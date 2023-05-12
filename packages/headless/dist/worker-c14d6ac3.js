@@ -1,4 +1,4 @@
-import { b as __awaiter, c as __generator, d as __extends, a as __assign, v as v4 } from './v4-4ce9d9ab.js';
+import { b as __awaiter, c as __generator, d as __extends, a as __assign, v as v4, e as expose } from './_tslib-f6a38a96.js';
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -3669,36 +3669,56 @@ var config = {
     tvmRuntimeJsUrl: 'https://cdn.matt-rickard.com/code/tvmjs_runtime.wasi.js',
     maxWindowSize: 2048,
 };
-// const imports = ['/sentencepiece.js', '/tvmjs_runtime.wasi.js']
-var imports = [
+var ModelWorker = /** @class */ (function () {
+    function ModelWorker() {
+        this.instance = new LLMInstance(config, function () { return globalThis.sentencepiece.sentencePieceProcessor; });
+    }
+    ModelWorker.prototype.init = function (callback) {
+        this.instance.init(callback);
+    };
+    ModelWorker.prototype.generate = function (conversation, stopTexts, maxTokens, callback) {
+        this.instance.generate(conversation, stopTexts, maxTokens, callback);
+    };
+    return ModelWorker;
+}());
+importScripts.apply(void 0, [
     config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
-];
-var initialProgressCallback = function (report) {
-    globalThis.postMessage(report);
-};
-var instance = new LLMInstance(config, function () { return globalThis.sentencepiece.sentencePieceProcessor; });
-globalThis.addEventListener('message', function (_a) {
-    var data = _a.data;
-    console.log("Message received", data);
-    if (data.type === 'init') {
-        if (instance.isInitialized()) {
-            return;
-        }
-        globalThis.importScripts.apply(globalThis, imports);
-        instance.init(initialProgressCallback);
-        return;
-    }
-    if (!instance.isInitialized()) {
-        globalThis.postMessage({
-            requestId: data.requestId,
-            type: 'error',
-            error: 'Model is not initialized',
-        });
-        return;
-    }
-    if (data.type === 'generateText') {
-        instance.generate(data.conversation, data.stopTexts, data.maxTokens, function (res) {
-            globalThis.postMessage(res);
-        });
-    }
-}, { passive: true });
+]);
+expose(ModelWorker);
+// const initialProgressCallback = (report: InitProgressReport) => {
+//     globalThis.postMessage(report)
+// };
+// const instance = new LLMInstance(config, () => globalThis.sentencepiece.sentencePieceProcessor);
+// globalThis.addEventListener(
+//     'message',
+//     ({ data }: { data: ModelRequest }) => {
+//         console.log("Message received", data)
+//         if (data.type === 'init') {
+//             if (instance.isInitialized()) {
+//                 return;
+//             }
+//             globalThis.importScripts(...imports);
+//             instance.init(initialProgressCallback as InitProgressCallback)
+//             return;
+//         }
+//         if (!instance.isInitialized()) {
+//             globalThis.postMessage({
+//                 requestId: data.requestId,
+//                 type: 'error',
+//                 error: 'Model is not initialized',
+//             } as ModelErrorResponse);
+//             return;
+//         }
+//         if (data.type === 'generateText') {
+//             globalThis.postMessage({
+//                 type: 'startGenerateText',
+//             })
+//             instance.generate(data.conversation, data.stopTexts, data.maxTokens, (res: GenerateTextResponse) => {
+//                 globalThis.postMessage(res);
+//             });
+//         }
+//     },
+//     { passive: true },
+// );
+
+export { ModelWorker };

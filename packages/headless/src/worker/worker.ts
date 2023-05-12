@@ -1,7 +1,15 @@
-import { GenerateTextResponse, ModelErrorResponse, ModelRequest } from '@/types/worker_message';
-import { InitProgressCallback, InitProgressReport } from '@/worker/lib/tvm/runtime';
-import { LLMInstance } from '@/worker/llm';
+import * as Comlink from "comlink";
+import { Conversation } from '../types/chat';
+import { GenerateTextResponse, ModelWorker } from '../types/worker_message';
+import { InitProgressCallback } from '../worker/lib/tvm/runtime';
+import { LLMInstance } from '../worker/llm';
 
+declare global {
+    var importScripts: (...url: string[]) => void;
+    var sentencepiece: {
+        sentencePieceProcessor: (url: string) => void;
+    };
+}
 
 const config = {
     kvConfig: {
@@ -29,47 +37,58 @@ export type Config = {
     sentencePieceJsUrl: string;
     tvmRuntimeJsUrl: string;
     maxWindowSize: number;
-
 }
-
-const imports = [
-    config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
-]
-
-const initialProgressCallback = (report: InitProgressReport) => {
-    globalThis.postMessage(report)
-};
 const instance = new LLMInstance(config, () => globalThis.sentencepiece.sentencePieceProcessor);
-globalThis.addEventListener(
-    'message',
-    ({ data }: { data: ModelRequest }) => {
-        console.log("Message received", data)
-        if (data.type === 'init') {
-            if (instance.isInitialized()) {
-                return;
-            }
-            globalThis.importScripts(...imports);
-            instance.init(initialProgressCallback as InitProgressCallback)
-            return;
-        }
-        if (!instance.isInitialized()) {
-            globalThis.postMessage({
-                requestId: data.requestId,
-                type: 'error',
-                error: 'Model is not initialized',
-            } as ModelErrorResponse);
-            return;
-        }
-        if (data.type === 'generateText') {
-            globalThis.postMessage({
-                type: 'startGenerateText',
-            })
-            instance.generate(data.conversation, data.stopTexts, data.maxTokens, (res: GenerateTextResponse) => {
-                globalThis.postMessage(res);
-            });
-        }
+const worker = {
+    init(callback: Comlink.ProxyOrClone<InitProgressCallback>) {
+        instance.init(callback);
     },
-    { passive: true },
-);
+    generate(conversation: Conversation, stopTexts: string[], maxTokens: number, callback: Comlink.ProxyOrClone<(data: GenerateTextResponse) => void>) {
+        instance.generate(conversation, stopTexts, maxTokens, callback);
+    }
+} as ModelWorker;
+
+importScripts(...[
+    config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
+]);
+
+Comlink.expose(worker);
+
+
+// const initialProgressCallback = (report: InitProgressReport) => {
+//     globalThis.postMessage(report)
+// };
+// const instance = new LLMInstance(config, () => globalThis.sentencepiece.sentencePieceProcessor);
+// globalThis.addEventListener(
+//     'message',
+//     ({ data }: { data: ModelRequest }) => {
+//         console.log("Message received", data)
+//         if (data.type === 'init') {
+//             if (instance.isInitialized()) {
+//                 return;
+//             }
+//             globalThis.importScripts(...imports);
+//             instance.init(initialProgressCallback as InitProgressCallback)
+//             return;
+//         }
+//         if (!instance.isInitialized()) {
+//             globalThis.postMessage({
+//                 requestId: data.requestId,
+//                 type: 'error',
+//                 error: 'Model is not initialized',
+//             } as ModelErrorResponse);
+//             return;
+//         }
+//         if (data.type === 'generateText') {
+//             globalThis.postMessage({
+//                 type: 'startGenerateText',
+//             })
+//             instance.generate(data.conversation, data.stopTexts, data.maxTokens, (res: GenerateTextResponse) => {
+//                 globalThis.postMessage(res);
+//             });
+//         }
+//     },
+//     { passive: true },
+// );
 
 

@@ -1,6 +1,6 @@
-import { Conversation } from "@/types/chat";
-import { GenerateTextCallback } from "@/types/worker_message";
 import { v4 as uuidv4 } from "uuid";
+import { Conversation } from "../types/chat";
+import { GenerateTextCallback } from "../types/worker_message";
 import { detectGPUDevice, instantiate } from "./lib/tvm";
 import { InitProgressCallback } from "./lib/tvm/runtime";
 import { Config } from "./worker";
@@ -11,6 +11,7 @@ export class LLMInstance {
   tokenizer: any;
   model: any;
   spp: any;
+  processing: boolean;
 
   constructor(config: Config, sentencePieceProcessor: any) {
     this.config = config;
@@ -18,6 +19,7 @@ export class LLMInstance {
     this.tokenizer = undefined;
     this.model = undefined;
     this.spp = sentencePieceProcessor;
+    this.processing = false;
   }
 
   isInitialized() {
@@ -60,7 +62,12 @@ export class LLMInstance {
   }
 
   async generate(conversation: Conversation, stopTexts: string[], maxTokens: number, callback: GenerateTextCallback) {
+    if (this.processing) {
+      return;
+    }
+    this.processing = true;
     await this.model.generate(conversation, stopTexts, maxTokens, callback);
+    this.processing = false;
   }
 }
 
@@ -140,6 +147,8 @@ export class LLMInstanceScope {
       tokens.unshift(...(await this.tokenizer.encodeIds(text)));
     }
 
+    console.log("conversation.systemPrompt", conversation.systemPrompt);
+
     tokens.unshift(
       ...(await this.tokenizer.encodeIds(conversation.systemPrompt))
     );
@@ -192,6 +201,7 @@ export class LLMInstanceScope {
   }
 
   async generate(conversation: Conversation, stopTexts: string[], maxTokens: number, cb: GenerateTextCallback) {
+    console.log("conversation", conversation)
     const tokens = await this.getTokens(conversation, maxTokens);
     tokens.push(...(await this.tokenizer.encodeIds("assistant:")));
 

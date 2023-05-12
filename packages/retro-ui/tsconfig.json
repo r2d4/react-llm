@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "es5",
     "lib": [
@@ -8,9 +9,9 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
+    "noEmit": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -27,13 +28,15 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.jsx"
   ],
   "references": [
     {

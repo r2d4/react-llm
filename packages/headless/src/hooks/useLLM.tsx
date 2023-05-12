@@ -1,165 +1,143 @@
-import { Conversation, Message } from "@/types/chat";
-import {
-  GenerateTextRequest,
-  GenerateTextResponse,
-  InitRequest,
-  InitResponse,
-  ModelErrorResponse,
-  ModelResponse,
-} from "@/types/worker_message";
-import { useEffect, useRef, useState } from "react";
+import { InitProgressReport } from "@/worker/lib/tvm/runtime";
+import * as Comlink from "comlink";
+import { Remote } from "comlink";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { Conversation } from "../types/chat";
+import { GenerateTextResponse, ModelWorker } from "../types/worker_message";
 import useConversationStore, {
   defaultSystemPrompt,
 } from "./useConversationStore";
 import useStore from "./useStore";
 
-type UseLLMParams = {
+export type UseLLMParams = {
   autoInit?: boolean;
 };
 
-type StatsPayload = {
-  encodingTotalTime: number;
-  encodingTotalTokens: number;
-  decodingTotalTime: number;
-  decodingTotalTokens: number;
+const initialProgress = {
+  type: "init" as const,
+  progress: 0,
+  timeElapsed: 0,
+  currentChunk: 0,
+  totalChunks: 0,
+  fetchedBytes: 0,
+  totalBytes: 0,
 };
 
-const useLLM = (props: UseLLMParams | undefined) => {
-  const [loadingStatus, setLoadingStatus] = useState<InitResponse>({
-    type: "init",
-    progress: 0,
-    timeElapsed: 0,
-    currentChunk: 0,
-    totalChunks: 0,
-    fetchedBytes: 0,
-    totalBytes: 0,
-  });
-  const [maxTokens, setMaxTokens] = useState<number>(100);
-  const [error, setError] = useState<string>("");
+export type UseLLMResponse = {
+  conversation: Conversation | undefined;
+  allConversations: Conversation[] | undefined;
+  maxTokens: number;
+  loadingStatus: InitProgressReport;
+  isGenerating: boolean;
+
+  createConversation: (title?: string, prompt?: string) => void;
+  setConversationId: (conversationId: string) => void;
+  deleteConversation: (conversationId: string) => void;
+  deleteAllConversations: () => void;
+  deleteMessages: () => void;
+  send: (msg: string) => void;
+  init: () => void;
+  setMaxTokens: (n: number) => void;
+};
+
+export const useLLMContext = (): UseLLMResponse => {
+  const [loadingStatus, setLoadingStatus] =
+    useState<InitProgressReport>(initialProgress);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const workerRef = useRef<Worker>();
+  const [maxTokens, setMaxTokens] = useState<number>(100);
+  const workerRef = useRef<Remote<ModelWorker>>();
   const cStore = useStore(useConversationStore, (state) => state);
 
+  const addMessage = useCallback(
+    (resp: GenerateTextResponse) => {
+      if (resp.isFinished) {
+        setIsGenerating(false);
+      }
+      cStore?.addMessage(cStore?.currentConversationId, {
+        id: resp.requestId,
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        role: "assistant",
+        text: resp.outputText,
+      });
+    },
+    [cStore, cStore?.currentConversationId]
+  );
+
   useEffect(() => {
     if (!workerRef.current) {
-      workerRef.current = new Worker(
-        new URL("../worker/worker", import.meta.url)
+      workerRef.current = Comlink.wrap(
+        new Worker(new URL("../worker/worker", import.meta.url))
       );
     }
-
-    if (props?.autoInit) {
-      workerRef.current?.postMessage({
-        type: "init",
-      } as InitRequest);
-    }
-
-    return () => {
-      workerRef.current?.terminate();
-    };
   }, []);
 
-  useEffect(() => {
-    if (!workerRef.current) {
-      return;
+  const send = (msg: string) => {
+    const currentConversation = cStore?.getConversation(
+      cStore?.currentConversationId
+    );
+    if (!currentConversation) {
+      throw new Error("Invalid conversation id");
     }
-    workerRef.current.onmessage = (event: MessageEvent<ModelResponse>) => {
-      console.log(event.data);
-      switch (event.data.type) {
-        case "init":
-          setLoadingStatus(event.data as InitResponse);
-          break;
-        case "error":
-          setError((event.data as ModelErrorResponse).error);
-          break;
-        case "startGenerateText":
-          setIsGenerating(true);
-          break;
-        case "generateText":
-          const resp = event.data as GenerateTextResponse;
-          cStore?.addMessage(cStore?.conversationId, {
-            id: resp.requestId,
-            createdAt: new Date().getTime(),
-            updatedAt: new Date().getTime(),
-            role: "assistant",
-            text: resp.outputText,
-          });
-          if (resp.isFinished) {
-            setIsGenerating(false);
-          }
-      }
-    };
-  }, [cStore?.conversationId, workerRef]);
-
-  useEffect(() => {
-    if (cStore?.conversationId === "" && cStore.conversations.length > 0) {
-      cStore.conversationId =
-        cStore?.conversations[cStore?.conversations.length - 1].id;
-    }
-  }, [cStore?.conversationId, cStore?.conversations]);
-
-  const sendUserMessage = (text: string) => {
-    if (loadingStatus.progress !== 1 || isGenerating) {
-      console.log("model not ready");
-      return;
-    }
-    const msg = {
+    currentConversation?.messages.push({
       id: uuidv4(),
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       role: "user",
-      text,
-    } as Message;
-
-    let conversation = cStore?.getConversation(cStore?.conversationId);
-    if (!conversation) {
-      conversation = {
-        id: uuidv4(),
-        systemPrompt: defaultSystemPrompt,
-        title: "Untitled",
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-        messages: [msg],
-      } as Conversation;
-      cStore?.createConversation(conversation);
-    } else {
-      cStore?.addMessage(conversation.id, {
-        id: uuidv4(),
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-        role: "user",
-        text,
-      });
-    }
-
-    workerRef.current?.postMessage({
-      type: "generateText",
-      conversation: {
-        ...conversation,
-        messages: [...conversation.messages, msg],
-      },
+      text: msg,
+    });
+    setIsGenerating(true);
+    workerRef?.current?.generate(
+      currentConversation,
+      [],
       maxTokens,
-    } as GenerateTextRequest);
+      Comlink.proxy(addMessage)
+    );
   };
 
   return {
-    conversationId: cStore?.conversationId,
-    loadingStatus,
-    error,
-    sendUserMessage,
-    isGenerating,
-    maxTokens,
-    init: () =>
-      workerRef.current?.postMessage({
-        type: "init",
-      } as InitRequest),
-    setMaxTokens,
+    conversation: cStore?.getConversation(cStore?.currentConversationId),
     allConversations: cStore?.conversations,
-    conversation: cStore?.getConversation(cStore?.conversationId),
-    createConversation: (c: Conversation) => cStore?.createConversation(c),
+
+    createConversation: (title?: string, prompt?: string) => {
+      const id = uuidv4();
+      console.log("title", title, "prmpt", prompt);
+      console.log("to create", {
+        id,
+        title: title ?? "Untitled",
+        systemPrompt: prompt ?? defaultSystemPrompt,
+        messages: [],
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+      });
+      cStore?.createConversation({
+        id,
+        title: title ?? "Untitled",
+        systemPrompt: prompt ?? defaultSystemPrompt,
+        messages: [],
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+      });
+    },
+
+    setConversationId: (id: string) => {
+      cStore?.setConversationId(id);
+    },
+
+    deleteConversation: (id: string) => {
+      cStore?.deleteConversation(id);
+    },
+    deleteMessages: () => cStore?.deleteMessages(cStore?.currentConversationId),
+
+    maxTokens,
+    setMaxTokens,
+    loadingStatus,
+    isGenerating,
+
+    send,
+    init: () => workerRef?.current?.init(Comlink.proxy(setLoadingStatus)),
+
     deleteAllConversations: () => cStore?.deleteAllConversations(),
-    clearMessages: () => cStore?.deleteMessages(cStore?.conversationId),
   };
 };
-
-export default useLLM;

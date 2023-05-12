@@ -1,3 +1,9 @@
+declare global {
+    var importScripts: (...url: string[]) => void;
+    var sentencepiece: {
+        sentencePieceProcessor: (url: string) => void;
+    };
+}
 export type Config = {
     kvConfig: {
         numLayers: number;

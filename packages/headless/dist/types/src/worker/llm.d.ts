@@ -1,5 +1,5 @@
-import { Conversation } from "@/types/chat";
-import { GenerateTextCallback } from "@/types/worker_message";
+import { Conversation } from "../types/chat";
+import { GenerateTextCallback } from "../types/worker_message";
 import { InitProgressCallback } from "./lib/tvm/runtime";
 import { Config } from "./worker";
 export declare class LLMInstance {
@@ -8,6 +8,7 @@ export declare class LLMInstance {
     tokenizer: any;
     model: any;
     spp: any;
+    processing: boolean;
     constructor(config: Config, sentencePieceProcessor: any);
     isInitialized(): boolean;
     init(cb: InitProgressCallback): Promise<any>;
