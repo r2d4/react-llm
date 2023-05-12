@@ -36,6 +36,7 @@ export type UseLLMResponse = {
   deleteConversation: (conversationId: string) => void;
   deleteAllConversations: () => void;
   deleteMessages: () => void;
+  setConversationTitle: (conversationId: string, title: string) => void;
   send: (msg: string) => void;
   init: () => void;
   setMaxTokens: (n: number) => void;
@@ -98,19 +99,13 @@ export const useLLMContext = (): UseLLMResponse => {
 
   return {
     conversation: cStore?.getConversation(cStore?.currentConversationId),
-    allConversations: cStore?.conversations,
+    // sort by updatedAt
+    allConversations: cStore?.conversations.sort(
+      (a: Conversation, b: Conversation) => b.updatedAt - a.updatedAt
+    ),
 
     createConversation: (title?: string, prompt?: string) => {
       const id = uuidv4();
-      console.log("title", title, "prmpt", prompt);
-      console.log("to create", {
-        id,
-        title: title ?? "Untitled",
-        systemPrompt: prompt ?? defaultSystemPrompt,
-        messages: [],
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-      });
       cStore?.createConversation({
         id,
         title: title ?? "Untitled",
@@ -119,6 +114,10 @@ export const useLLMContext = (): UseLLMResponse => {
         createdAt: new Date().getTime(),
         updatedAt: new Date().getTime(),
       });
+    },
+
+    setConversationTitle: (id: string, title: string) => {
+      cStore?.setConversationTitle(id, title);
     },
 
     setConversationId: (id: string) => {

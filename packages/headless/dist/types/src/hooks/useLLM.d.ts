@@ -14,6 +14,7 @@ export type UseLLMResponse = {
     deleteConversation: (conversationId: string) => void;
     deleteAllConversations: () => void;
     deleteMessages: () => void;
+    setConversationTitle: (conversationId: string, title: string) => void;
     send: (msg: string) => void;
     init: () => void;
     setMaxTokens: (n: number) => void;

@@ -11,8 +11,11 @@ export interface ConversationStore {
   addMessage: (conversationId: string, message: Message) => void;
   getConversation: (conversationId: string) => Conversation | undefined;
 
+  setConversationTitle: (conversationId: string, title: string) => void;
+
   getAllConversations: () => Conversation[];
   deleteMessages: (conversationId: string) => void;
+
   deleteConversation: (conversationId: string) => void;
   createConversation: (conversation: Conversation) => void;
   deleteAllConversations: () => void;
@@ -41,6 +44,25 @@ const useConversationStore = create<ConversationStore>()(
             return {
               currentConversationId: conversation.id,
               conversations: [...state.conversations, conversation],
+            };
+          });
+        },
+        setConversationTitle(conversationId, title) {
+          set((state) => {
+            const conversation = state.conversations.find(
+              (c) => c.id === conversationId
+            );
+            if (!conversation) {
+              return state;
+            }
+            return {
+              conversations: [
+                ...state.conversations.filter((c) => c.id !== conversationId),
+                {
+                  ...conversation,
+                  title,
+                },
+              ],
             };
           });
         },

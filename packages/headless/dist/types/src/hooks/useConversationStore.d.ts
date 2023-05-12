@@ -5,6 +5,7 @@ export interface ConversationStore {
     setConversationId: (conversationId: string) => void;
     addMessage: (conversationId: string, message: Message) => void;
     getConversation: (conversationId: string) => Conversation | undefined;
+    setConversationTitle: (conversationId: string, title: string) => void;
     getAllConversations: () => Conversation[];
     deleteMessages: (conversationId: string) => void;
     deleteConversation: (conversationId: string) => void;

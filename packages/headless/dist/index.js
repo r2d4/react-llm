@@ -910,6 +910,19 @@ var useConversationStore = create()(persist(function (set, get) {
                 };
             });
         },
+        setConversationTitle: function (conversationId, title) {
+            set(function (state) {
+                var conversation = state.conversations.find(function (c) { return c.id === conversationId; });
+                if (!conversation) {
+                    return state;
+                }
+                return {
+                    conversations: __spreadArray(__spreadArray([], state.conversations.filter(function (c) { return c.id !== conversationId; }), true), [
+                        __assign(__assign({}, conversation), { title: title }),
+                    ], false),
+                };
+            });
+        },
         deleteConversation: function (conversationId) {
             console.log("delete", conversationId);
             set(function (state) {
@@ -1044,18 +1057,10 @@ var useLLMContext = function () {
     };
     return {
         conversation: cStore === null || cStore === void 0 ? void 0 : cStore.getConversation(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId),
-        allConversations: cStore === null || cStore === void 0 ? void 0 : cStore.conversations,
+        // sort by updatedAt
+        allConversations: cStore === null || cStore === void 0 ? void 0 : cStore.conversations.sort(function (a, b) { return b.updatedAt - a.updatedAt; }),
         createConversation: function (title, prompt) {
             var id = v4();
-            console.log("title", title, "prmpt", prompt);
-            console.log("to create", {
-                id: id,
-                title: title !== null && title !== void 0 ? title : "Untitled",
-                systemPrompt: prompt !== null && prompt !== void 0 ? prompt : defaultSystemPrompt,
-                messages: [],
-                createdAt: new Date().getTime(),
-                updatedAt: new Date().getTime(),
-            });
             cStore === null || cStore === void 0 ? void 0 : cStore.createConversation({
                 id: id,
                 title: title !== null && title !== void 0 ? title : "Untitled",
@@ -1064,6 +1069,9 @@ var useLLMContext = function () {
                 createdAt: new Date().getTime(),
                 updatedAt: new Date().getTime(),
             });
+        },
+        setConversationTitle: function (id, title) {
+            cStore === null || cStore === void 0 ? void 0 : cStore.setConversationTitle(id, title);
         },
         setConversationId: function (id) {
             cStore === null || cStore === void 0 ? void 0 : cStore.setConversationId(id);
