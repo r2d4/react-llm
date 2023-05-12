@@ -1,0 +1,17 @@
+{
+  "name": "retro-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@next/font": "^13.4.2",
+    "@react-llm/headless": "^0.0.1",
+    "react95": "^4.0.0",
+    "styled-components": "^5.3.10"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "noEmit": false,
+    "composite": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "types": [
+      "@webgpu/types"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "incremental": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+    },
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

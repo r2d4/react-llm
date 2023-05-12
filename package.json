@@ -1,0 +1,26 @@
+{
+  "name": "@react-llm/workspace",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "dist/bundle.cjs.js",
+  "module": "dist/bundle.esm.js",
+  "author": "Matt Rickard <npm@matt-rickard.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/headless",
+    "packages/retro-ui"
+  ],
+  "scripts": {
+    "ui": "yarn -w @react-llm/retro-ui",
+    "headless": "yarn -w @react-llm/headless",
+    "publish": "npm publish -w @react-llm/headless"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "react95": "^4.0.0",
+    "styled-components": "^5.3.10"
+  }
+}
