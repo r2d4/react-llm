@@ -1,6 +1,4 @@
 import React from "react";
-import "./globals.css";
-/* Pick a theme of your choice */
 
 export const metadata = {
   title: "Local LLM Chat",
