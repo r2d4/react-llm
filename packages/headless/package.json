@@ -1,0 +1,63 @@
+{
+  "name": "@react-llm/headless",
+  "version": "0.0.3",
+  "author": "Matt Rickard <npm@matt-rickard.com>",
+  "license": "MIT",
+  "module": "dist/index.js",
+  "type": "module",
+  "types": "dist/types/index.d.ts",
+  "keywords": [
+    "chatgpt",
+    "llm",
+    "headless",
+    "react"
+  ],
+  "scripts": {
+    "build": "npm run clean && rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.21.5",
+    "@surma/rollup-plugin-off-main-thread": "^2.2.3",
+    "@types/node": "20.1.1",
+    "@types/react": "18.2.6",
+    "@types/react-dom": "18.2.4",
+    "autoprefixer": "10.4.14",
+    "comlink": "^4.4.1",
+    "eslint": "8.40.0",
+    "eslint-config-next": "13.4.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.0.4",
+    "uuid": "^9.0.0",
+    "zustand": "^4.3.8"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.21.8",
+    "@babel/preset-env": "^7.21.5",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.21.5",
+    "@rollup/plugin-alias": "^5.0.0",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@types/uuid": "^9.0.1",
+    "@webgpu/types": "^0.1.32",
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "rollup": "^3.21.6",
+    "rollup-plugin-dts": "^5.3.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-tsconfig-paths": "^1.5.0",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "rollup-plugin-web-worker-loader": "^1.6.1",
+    "tsconfig-paths-webpack-plugin": "^4.0.1",
+    "ttypescript": "^1.5.15",
+    "webpack": "^5.82.1",
+    "webpack-cli": "^5.1.1"
+  }
+}
