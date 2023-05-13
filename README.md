@@ -2,7 +2,8 @@
 
 Easy to use headless React Hooks to run LLMs in the browser with WebGPU. As simple as `useLLM()`.
 
-[Live Demo](https://chat.matt-rickard.com)
+### [**Live Demo**](https://chat.matt-rickard.com)
+
 ![image](assets/demo.webp)
 
 Features:
