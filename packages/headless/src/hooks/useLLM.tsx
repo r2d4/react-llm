@@ -90,7 +90,7 @@ export type UseLLMResponse = {
   gpuDevice: GPUDeviceInfo;
 
   // Send sends a message to the model for generation.
-  send: (msg: string) => void;
+  send: (text: string, maxToken: number, stopSequences: string[]) => void;
 
   // Init initializes the model.
   init: () => void;
@@ -174,7 +174,7 @@ export const useLLMContext = (): UseLLMResponse => {
   }, []);
 
   const send = (
-    msg: string,
+    text: string,
     maxTokens = 100,
     stopStrings = [userRoleName, assistantRoleName] as string[]
   ) => {
@@ -189,7 +189,7 @@ export const useLLMContext = (): UseLLMResponse => {
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       role: userRoleName,
-      text: msg,
+      text,
     });
     setIsGenerating(true);
     workerRef?.current?.generate(

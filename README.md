@@ -3,6 +3,7 @@
 Easy to use headless React Hooks to run LLMs in the browser with WebGPU. As simple as `useLLM()`.
 
 [Live Demo](https://chat.matt-rickard.com)
+![image](assets/demo.webp)
 
 Features:
 
@@ -24,28 +25,36 @@ npm install @react-llm/headless
 ## **useLLM** API
 ### Types
 ```typescript
-export type UseLLMResponse = {
-  conversation: Conversation | undefined;
-  allConversations: Conversation[] | undefined;
-  loadingStatus: InitProgressReport;
-  isGenerating: boolean;
-  createConversation: (title?: string, prompt?: string) => void;
-  setConversationId: (conversationId: string) => void;
-  deleteConversation: (conversationId: string) => void;
-  deleteAllConversations: () => void;
-  deleteMessages: () => void;
-  setConversationTitle: (conversationId: string, title: string) => void;
-  onMessage: (msg: GenerateTextResponse) => void;
-  setOnMessage: (cb: (msg: GenerateTextResponse) => void) => void;
-  userRoleName: string;
-  setUserRoleName: (roleName: string) => void;
-  assistantRoleName: string;
-  setAssistantRoleName: (roleName: string) => void;
-  gpuDevice: GPUDeviceInfo;
-  send: (msg: string) => void;
-  init: () => void;
-};
+// Model Initialization
+init: () => void;
+
+// Model Generation
+send: (msg: string, maxTokens: number, stopSequences: string[]) => void;
+onMessage: (msg: GenerateTextResponse) => void;
+setOnMessage: (cb: (msg: GenerateTextResponse) => void) => void;
+
+// Model Status
+loadingStatus: InitProgressReport;
+isGenerating: boolean;
+gpuDevice: GPUDeviceInfo;
+
+// Model Configuration
+userRoleName: string;
+setUserRoleName: (roleName: string) => void;
+assistantRoleName: string;
+setAssistantRoleName: (roleName: string) => void;
+
+// Conversation Management
+conversation: Conversation | undefined;
+allConversations: Conversation[] | undefined;
+createConversation: (title?: string, prompt?: string) => void;
+setConversationId: (conversationId: string) => void;
+deleteConversation: (conversationId: string) => void;
+deleteAllConversations: () => void;
+deleteMessages: () => void;
+setConversationTitle: (conversationId: string, title: string) => void;
 ```
+
 ### Hooks
 ```typescript
 import useLLM from '@react-llm/headless';
@@ -78,13 +87,6 @@ const MyComponent = () => {
   return null;
 };
 ```
-
-**Model Initialization**
-
-`init(): void`
-
-Initializes the model.
-
 
 ## How does it work?
 
