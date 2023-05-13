@@ -23,6 +23,7 @@ export default [
       nodeResolve(),
       typescript({
         tsconfig: "tsconfig.json",
+        sourceMap: false,
         useTsconfigDeclarationDir: true,
       }),
       OMT(),

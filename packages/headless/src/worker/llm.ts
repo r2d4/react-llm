@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { Conversation } from "../types/chat";
-import { GenerateTextCallback } from "../types/worker_message";
+import { GenerateTextCallback, GenerateTextRequest } from "../types/worker_message";
 import { detectGPUDevice, instantiate } from "./lib/tvm";
 import { InitProgressCallback } from "./lib/tvm/runtime";
 import { Config } from "./worker";
@@ -61,12 +61,12 @@ export class LLMInstance {
     return this.model.init();
   }
 
-  async generate(conversation: Conversation, stopTexts: string[], maxTokens: number, callback: GenerateTextCallback) {
+  async generate(request: GenerateTextRequest, cb: GenerateTextCallback) {
     if (this.processing) {
       return;
     }
     this.processing = true;
-    await this.model.generate(conversation, stopTexts, maxTokens, callback);
+    await this.model.generate(request, cb);
     this.processing = false;
   }
 }
@@ -146,9 +146,6 @@ export class LLMInstanceScope {
       }
       tokens.unshift(...(await this.tokenizer.encodeIds(text)));
     }
-
-    console.log("conversation.systemPrompt", conversation.systemPrompt);
-
     tokens.unshift(
       ...(await this.tokenizer.encodeIds(conversation.systemPrompt))
     );
@@ -200,12 +197,11 @@ export class LLMInstanceScope {
     return tokens;
   }
 
-  async generate(conversation: Conversation, stopTexts: string[], maxTokens: number, cb: GenerateTextCallback) {
-    console.log("conversation", conversation)
+  async generate(request: GenerateTextRequest, cb: GenerateTextCallback) {
+    const { conversation, maxTokens, assistantRoleName, stopTexts } = request;
     const tokens = await this.getTokens(conversation, maxTokens);
-    tokens.push(...(await this.tokenizer.encodeIds("assistant:")));
-
-    console.log("Decoded: ", await this.tokenizer.decodeIds(tokens));
+    tokens.push(...(await this.tokenizer.encodeIds(`${assistantRoleName}:`)));
+    console.log("decoded: ", await this.tokenizer.decodeIds(tokens));
 
     const inputTokenLength = tokens.length;
     let outputText = "";
@@ -241,9 +237,22 @@ export class LLMInstanceScope {
         outputText = outputText.substring(0, stopPos);
         break;
       }
+      let stop = false;
+      for (let i = 0; i < stopTexts.length; i++) {
+        console.log("outputText.endsWith(stopTexts[i])", outputText.endsWith(stopTexts[i]), stopTexts[i], outputText)
+        if (outputText.endsWith(stopTexts[i])) {
+          console.log("true!")
+          outputText = outputText.substring(
+            0,
+            outputText.length - stopTexts[i].length
+          );
+          stop = true;
+          break;
+        }
+      }
+      if (stop) break;
       if (step != 0) {
         cb({
-          type: "generateText",
           requestId: id,
           step: step,
           outputText,
@@ -260,7 +269,6 @@ export class LLMInstanceScope {
     this.lastMessageId = id;
 
     cb({
-      type: "generateText",
       requestId: id,
       outputText,
       step: step,
@@ -271,12 +279,6 @@ export class LLMInstanceScope {
       },
       isFinished: true,
     });
-  }
-
-  reset() {
-    this.clearKVCache();
-    this.kvCacheLength = 0;
-    this.lastMessageId = "";
   }
 
   dispose() {
@@ -293,8 +295,10 @@ export class LLMInstanceScope {
   }
 
   clearKVCache() {
+    console.log("cleared conversation attention kv cache")
     this.fclearKVCaches(this.kvCache);
     this.kvCacheLength = 0;
+    this.lastMessageId = "";
   }
 
   forward(inputs: any, curPos: number) {

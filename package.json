@@ -12,9 +12,8 @@
     "packages/retro-ui"
   ],
   "scripts": {
-    "ui": "yarn -w @react-llm/retro-ui",
-    "headless": "yarn -w @react-llm/headless",
-    "publish": "npm publish -w @react-llm/headless"
+    "publish": "npm publish -w @react-llm/headless",
+    "build": "cd packages/headless && npm run build && cd ../retro-ui && npm run build && cd ../.."
   },
   "devDependencies": {
     "typescript": "^5.0.4"

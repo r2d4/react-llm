@@ -4,14 +4,20 @@ import { Conversation } from "./chat";
 
 export type ModelWorker = {
     init(callback: Comlink.ProxyOrClone<InitCallback>): void;
-    generate(conversation: Conversation, stopTexts: string[], maxTokens: number, callback: Comlink.ProxyOrClone<GenerateTextCallback>): void;
+    generate(request: GenerateTextRequest, callback: Comlink.ProxyOrClone<GenerateTextCallback>): void;
 }
 
 export type InitCallback = InitProgressCallback;
 export type GenerateTextCallback = (data: GenerateTextResponse) => void;
 
+export type GenerateTextRequest = {
+    conversation: Conversation,
+    stopTexts: string[],
+    maxTokens: number,
+    assistantRoleName: string,
+}
+
 export type GenerateTextResponse = {
-    type: 'generateText',
     requestId: string,
     step: number,
     outputText: string,

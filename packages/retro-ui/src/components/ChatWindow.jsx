@@ -14,6 +14,8 @@ import Loader from "./Loader";
 import MessageList from "./MessageList";
 
 function ChatWindow({
+  stopStrings,
+  maxTokens,
   screenName = "endlessbox5",
   assistantScreenName = "SmartestChild",
 }) {
@@ -30,9 +32,9 @@ function ChatWindow({
     if (isGenerating || !isReady) {
       return;
     }
-    send(userInput);
+    send(userInput, maxTokens, stopStrings);
     setUserInput("");
-  }, [userInput, send, isGenerating, isReady]);
+  }, [userInput, send, isGenerating, isReady, maxTokens, stopStrings]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {

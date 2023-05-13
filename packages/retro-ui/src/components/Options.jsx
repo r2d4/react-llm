@@ -4,6 +4,7 @@ import {
   Button,
   GroupBox,
   NumberInput,
+  Select,
   Tab,
   Tabs,
   TextInput,
@@ -12,16 +13,19 @@ import {
   WindowHeader,
 } from "react95";
 
-const Options = ({ screenName, setScreenName }) => {
-  const {
-    init,
-    maxTokens,
-    setMaxTokens,
-    deleteMessages,
-    deleteConversation,
-    conversation,
-  } = useLLM();
+import { themeList } from "./Chat";
 
+const Options = ({
+  screenName,
+  setScreenName,
+  stopStrings,
+  setStopStrings,
+  maxTokens,
+  setMaxTokens,
+  theme,
+  setTheme,
+}) => {
+  const { conversation } = useLLM();
   const [activeTab, setActiveTab] = useState(0);
 
   return (
@@ -45,21 +49,23 @@ const Options = ({ screenName, setScreenName }) => {
             conversation={conversation}
           />
         )}
-        {activeTab === 2 && <SettingsTab />}
+        {activeTab === 2 && (
+          <SettingsTab
+            stopStrings={stopStrings}
+            setStopStrings={setStopStrings}
+            maxTokens={maxTokens}
+            setMaxTokens={setMaxTokens}
+            theme={theme}
+            setTheme={setTheme}
+          />
+        )}
       </WindowContent>
     </Window>
   );
 };
 
 const ConversationTab = ({ screenName, setScreenName, conversation }) => {
-  const {
-    init,
-    maxTokens,
-    setMaxTokens,
-    deleteMessages,
-    deleteConversation,
-    setConversationTitle,
-  } = useLLM();
+  const { deleteMessages, setConversationTitle } = useLLM();
 
   const [title, setTitle] = useState(conversation?.title);
 
@@ -110,16 +116,23 @@ const ConversationTab = ({ screenName, setScreenName, conversation }) => {
   );
 };
 
-const SettingsTab = () => {
+const SettingsTab = ({
+  stopStrings,
+  setStopStrings,
+  maxTokens,
+  setMaxTokens,
+  theme,
+  setTheme,
+}) => {
   const {
     init,
-    maxTokens,
-    setMaxTokens,
-    deleteMessages,
     deleteConversation,
-    setConversationTitle,
+    conversation,
+    userRoleName,
+    setUserRoleName,
+    assistantRoleName,
+    setAssistantRoleName,
   } = useLLM();
-
   return (
     <div
       style={{
@@ -133,16 +146,53 @@ const SettingsTab = () => {
       <Button onClick={() => deleteConversation(conversation.id)}>
         Delete Conversation
       </Button>
-      <div>Max Tokens</div>
-      <NumberInput
-        defaultValue={maxTokens}
-        step={10}
-        min={1}
-        max={300}
-        onChange={(value) => {
-          if (typeof value === "number") setMaxTokens(value);
-        }}
-      />
+      <GroupBox label={"Max Tokens"}>
+        <NumberInput
+          defaultValue={maxTokens}
+          step={10}
+          min={1}
+          max={300}
+          onChange={(value) => {
+            if (typeof value === "number") setMaxTokens(value);
+          }}
+        />
+      </GroupBox>
+      <GroupBox label={"Stop Strings (comma separated)"}>
+        <TextInput
+          value={stopStrings?.join(",")}
+          multiline
+          rows={3}
+          onChange={(e) => setStopStrings(e.target.value.split(","))}
+          placeholder="Stop Strings"
+        />
+      </GroupBox>
+      <GroupBox label="Assistant Role Name">
+        <TextInput
+          value={assistantRoleName}
+          onChange={(e) => setAssistantRoleName(e.target.value)}
+          placeholder="Assistant Role Name"
+        />
+      </GroupBox>
+      <GroupBox label="User Role Name">
+        <TextInput
+          value={userRoleName}
+          onChange={(e) => setUserRoleName(e.target.value)}
+          placeholder="User Role Name"
+        />
+      </GroupBox>
+      <GroupBox label={"Theme"} style={{ width: "100%" }}>
+        <Select
+          fullWidth
+          style={{ width: "100%" }}
+          width={"75%"}
+          value={theme.value}
+          defaultValue={theme.label}
+          options={themeList}
+          onChange={(e) => {
+            setTheme(e);
+          }}
+        />
+      </GroupBox>
     </div>
   );
 };
@@ -153,6 +203,10 @@ const AboutTab = () => {
       <div>
         <p>
           A Large Language Model that runs entirely in the browser with WebGPU.
+        </p>
+        <p>
+          No data is sent to the server. Conversations are cached in local
+          storage.
         </p>
         <p>WebGPU is only supported in Desktop Google Chrome 113</p>
         <p>Powered by Apache TVM and MLC Relax Runtime.</p>

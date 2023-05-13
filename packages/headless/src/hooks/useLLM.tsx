@@ -4,7 +4,11 @@ import { Remote } from "comlink";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Conversation } from "../types/chat";
-import { GenerateTextResponse, ModelWorker } from "../types/worker_message";
+import {
+  GenerateTextRequest,
+  GenerateTextResponse,
+  ModelWorker,
+} from "../types/worker_message";
 import useConversationStore, {
   defaultSystemPrompt,
 } from "./useConversationStore";
@@ -27,7 +31,6 @@ const initialProgress = {
 export type UseLLMResponse = {
   conversation: Conversation | undefined;
   allConversations: Conversation[] | undefined;
-  maxTokens: number;
   loadingStatus: InitProgressReport;
   isGenerating: boolean;
 
@@ -37,18 +40,26 @@ export type UseLLMResponse = {
   deleteAllConversations: () => void;
   deleteMessages: () => void;
   setConversationTitle: (conversationId: string, title: string) => void;
+
+  userRoleName: string;
+  setUserRoleName: (roleName: string) => void;
+
+  assistantRoleName: string;
+  setAssistantRoleName: (roleName: string) => void;
+
   send: (msg: string) => void;
   init: () => void;
-  setMaxTokens: (n: number) => void;
 };
 
 export const useLLMContext = (): UseLLMResponse => {
   const [loadingStatus, setLoadingStatus] =
     useState<InitProgressReport>(initialProgress);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [maxTokens, setMaxTokens] = useState<number>(100);
   const workerRef = useRef<Remote<ModelWorker>>();
   const cStore = useStore(useConversationStore, (state) => state);
+  const [userRoleName, setUserRoleName] = useState<string>("user");
+  const [assistantRoleName, setAssistantRoleName] =
+    useState<string>("assistant");
 
   const addMessage = useCallback(
     (resp: GenerateTextResponse) => {
@@ -59,7 +70,7 @@ export const useLLMContext = (): UseLLMResponse => {
         id: resp.requestId,
         createdAt: new Date().getTime(),
         updatedAt: new Date().getTime(),
-        role: "assistant",
+        role: assistantRoleName,
         text: resp.outputText,
       });
     },
@@ -74,7 +85,11 @@ export const useLLMContext = (): UseLLMResponse => {
     }
   }, []);
 
-  const send = (msg: string) => {
+  const send = (
+    msg: string,
+    maxTokens = 100,
+    stopStrings = [userRoleName, assistantRoleName] as string[]
+  ) => {
     const currentConversation = cStore?.getConversation(
       cStore?.currentConversationId
     );
@@ -85,21 +100,25 @@ export const useLLMContext = (): UseLLMResponse => {
       id: uuidv4(),
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
-      role: "user",
+      role: userRoleName,
       text: msg,
     });
     setIsGenerating(true);
+    console.log("right before generated");
     workerRef?.current?.generate(
-      currentConversation,
-      [],
-      maxTokens,
+      {
+        conversation: currentConversation,
+        stopTexts: stopStrings,
+        maxTokens,
+        assistantRoleName,
+      } as GenerateTextRequest,
       Comlink.proxy(addMessage)
     );
   };
 
   return {
     conversation: cStore?.getConversation(cStore?.currentConversationId),
-    // sort by updatedAt
+
     allConversations: cStore?.conversations.sort(
       (a: Conversation, b: Conversation) => b.updatedAt - a.updatedAt
     ),
@@ -129,10 +148,14 @@ export const useLLMContext = (): UseLLMResponse => {
     },
     deleteMessages: () => cStore?.deleteMessages(cStore?.currentConversationId),
 
-    maxTokens,
-    setMaxTokens,
     loadingStatus,
     isGenerating,
+
+    userRoleName,
+    setUserRoleName,
+
+    assistantRoleName,
+    setAssistantRoleName,
 
     send,
     init: () => workerRef?.current?.init(Comlink.proxy(setLoadingStatus)),
