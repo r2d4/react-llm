@@ -1,3 +1,4 @@
+import { detectGPUDevice } from "@/worker/lib/tvm";
 import { InitProgressReport } from "@/worker/lib/tvm/runtime";
 import * as Comlink from "comlink";
 import { Remote } from "comlink";
@@ -28,6 +29,14 @@ const initialProgress = {
   totalBytes: 0,
 };
 
+export type GPUDeviceInfo = {
+  adapter: GPUAdapter | null;
+  device: GPUDevice | null;
+  adapterInfo: GPUAdapterInfo | null;
+  checked: boolean;
+  unsupportedReason: string | null;
+};
+
 export type UseLLMResponse = {
   conversation: Conversation | undefined;
   allConversations: Conversation[] | undefined;
@@ -50,6 +59,8 @@ export type UseLLMResponse = {
   assistantRoleName: string;
   setAssistantRoleName: (roleName: string) => void;
 
+  gpuDevice: GPUDeviceInfo;
+
   send: (msg: string) => void;
   init: () => void;
 };
@@ -63,6 +74,46 @@ export const useLLMContext = (): UseLLMResponse => {
   const [userRoleName, setUserRoleName] = useState<string>("user");
   const [assistantRoleName, setAssistantRoleName] =
     useState<string>("assistant");
+
+  const [gpuDevice, setGpuDevice] = useState<GPUDeviceInfo>({
+    adapter: null,
+    device: null,
+    adapterInfo: null,
+    checked: false,
+    unsupportedReason: null,
+  });
+
+  useEffect(() => {
+    if (!gpuDevice || !gpuDevice.checked) {
+      detectGPUDevice()
+        .then((resp) => {
+          if (resp) {
+            setGpuDevice({
+              unsupportedReason: null,
+              checked: true,
+              adapter: resp.adapter,
+              device: resp.device,
+              adapterInfo: resp.adapterInfo,
+            });
+          } else {
+            setGpuDevice({
+              ...gpuDevice,
+              checked: true,
+              unsupportedReason: "GPU is not supported",
+            });
+          }
+        })
+        .catch((err) => {
+          setGpuDevice({
+            adapter: null,
+            device: null,
+            adapterInfo: null,
+            checked: true,
+            unsupportedReason: err.message,
+          });
+        });
+    }
+  }, []);
 
   const [onMessage, setOnMessage] = useState<any>();
 
@@ -164,6 +215,8 @@ export const useLLMContext = (): UseLLMResponse => {
 
     assistantRoleName,
     setAssistantRoleName,
+
+    gpuDevice,
 
     send,
     init: () => workerRef?.current?.init(Comlink.proxy(setLoadingStatus)),

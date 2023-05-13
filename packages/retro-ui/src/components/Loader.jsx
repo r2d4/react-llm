@@ -2,9 +2,23 @@ import useLLM from "@react-llm/headless";
 import { Button, ProgressBar } from "react95";
 
 const Loader = () => {
-  const { loadingStatus, isReady, init } = useLLM();
+  const { loadingStatus, isReady, init, gpuDevice } = useLLM();
   if (isReady) return null;
   if (loadingStatus.progress === 1) return null;
+
+  if (gpuDevice.unsupportedReason) {
+    return (
+      <div style={{ fontSize: "20px" }}>
+        <p style={{ color: "red" }}>Sorry, unsupported!</p>
+        <p> Reason: {gpuDevice.unsupportedReason}</p>
+        <p>
+          <a href={"http://github.com/react-llm"}>react-llm</a> runs models in
+          the browser with WebGPU and only works in Google Chrome v113 and above
+          on Desktop with supported GPUs.
+        </p>
+      </div>
+    );
+  }
 
   if (loadingStatus.progress == 0) {
     return (

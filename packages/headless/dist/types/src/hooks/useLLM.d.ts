@@ -1,8 +1,16 @@
+/// <reference types="@webgpu/types" />
 import { InitProgressReport } from "@/worker/lib/tvm/runtime";
 import { Conversation } from "../types/chat";
 import { GenerateTextResponse } from "../types/worker_message";
 export type UseLLMParams = {
     autoInit?: boolean;
+};
+export type GPUDeviceInfo = {
+    adapter: GPUAdapter | null;
+    device: GPUDevice | null;
+    adapterInfo: GPUAdapterInfo | null;
+    checked: boolean;
+    unsupportedReason: string | null;
 };
 export type UseLLMResponse = {
     conversation: Conversation | undefined;
@@ -21,6 +29,7 @@ export type UseLLMResponse = {
     setUserRoleName: (roleName: string) => void;
     assistantRoleName: string;
     setAssistantRoleName: (roleName: string) => void;
+    gpuDevice: GPUDeviceInfo;
     send: (msg: string) => void;
     init: () => void;
 };

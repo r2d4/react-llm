@@ -1,5 +1,5 @@
 import require$$0, { useDebugValue, useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
-import { v as v4, _ as __spreadArray, a as __assign, w as wrap, p as proxy } from './_tslib-f6a38a96.js';
+import { v as v4, _ as __spreadArray, a as __assign, d as detectGPUDevice, w as wrap, p as proxy } from './v4-2119d9d5.js';
 
 const createStoreImpl = createState => {
   let state;
@@ -1022,7 +1022,42 @@ var useLLMContext = function () {
     var cStore = useStore(useConversationStore, function (state) { return state; });
     var _c = useState("user"), userRoleName = _c[0], setUserRoleName = _c[1];
     var _d = useState("assistant"), assistantRoleName = _d[0], setAssistantRoleName = _d[1];
-    var _e = useState(), onMessage = _e[0], setOnMessage = _e[1];
+    var _e = useState({
+        adapter: null,
+        device: null,
+        adapterInfo: null,
+        checked: false,
+        unsupportedReason: null,
+    }), gpuDevice = _e[0], setGpuDevice = _e[1];
+    useEffect(function () {
+        if (!gpuDevice || !gpuDevice.checked) {
+            detectGPUDevice()
+                .then(function (resp) {
+                if (resp) {
+                    setGpuDevice({
+                        unsupportedReason: null,
+                        checked: true,
+                        adapter: resp.adapter,
+                        device: resp.device,
+                        adapterInfo: resp.adapterInfo,
+                    });
+                }
+                else {
+                    setGpuDevice(__assign(__assign({}, gpuDevice), { checked: true, unsupportedReason: "GPU is not supported" }));
+                }
+            })
+                .catch(function (err) {
+                setGpuDevice({
+                    adapter: null,
+                    device: null,
+                    adapterInfo: null,
+                    checked: true,
+                    unsupportedReason: err.message,
+                });
+            });
+        }
+    }, []);
+    var _f = useState(), onMessage = _f[0], setOnMessage = _f[1];
     var addMessage = useCallback(function (resp) {
         if (resp.isFinished) {
             setIsGenerating(false);
@@ -1039,7 +1074,7 @@ var useLLMContext = function () {
     }, [cStore, cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId, onMessage, setOnMessage]);
     useEffect(function () {
         if (!workerRef.current) {
-            workerRef.current = wrap(new Worker(new URL("worker-6c9a2e2e.js", import.meta.url)));
+            workerRef.current = wrap(new Worker(new URL("worker-cc79b531.js", import.meta.url)));
         }
     }, []);
     var send = function (msg, maxTokens, stopStrings) {
@@ -1097,6 +1132,7 @@ var useLLMContext = function () {
         setUserRoleName: setUserRoleName,
         assistantRoleName: assistantRoleName,
         setAssistantRoleName: setAssistantRoleName,
+        gpuDevice: gpuDevice,
         send: send,
         init: function () { var _a; return (_a = workerRef === null || workerRef === void 0 ? void 0 : workerRef.current) === null || _a === void 0 ? void 0 : _a.init(proxy(setLoadingStatus)); },
         deleteAllConversations: function () { return cStore === null || cStore === void 0 ? void 0 : cStore.deleteAllConversations(); },

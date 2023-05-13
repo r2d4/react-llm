@@ -22,7 +22,8 @@ function ChatWindow({
   assistantScreenName = "SmartestChild",
   soundLevel,
 }) {
-  const { loadingStatus, send, isGenerating, setOnMessage } = useLLM();
+  const { loadingStatus, send, isGenerating, setOnMessage, gpuDevice } =
+    useLLM();
   const [userInput, setUserInput] = useState("");
   const [playSend] = useSound("/sounds/imsend.wav", { volume: soundLevel });
   const [playRcv] = useSound("/sounds/imrcv.wav", { volume: soundLevel });

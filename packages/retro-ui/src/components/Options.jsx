@@ -64,8 +64,30 @@ const Options = ({
             setSoundLevel={setSoundLevel}
           />
         )}
+        {activeTab === 3 && <StatsTab />}
       </WindowContent>
     </Window>
+  );
+};
+
+const StatsTab = () => {
+  const { gpuDevice } = useLLM();
+  return (
+    <div>
+      {gpuDevice.checked && !gpuDevice.unsupportedReason && (
+        <GroupBox label="GPU">
+          <div>Vendor={gpuDevice.adapterInfo.vendor}</div>
+          <div>Architecture={gpuDevice.adapterInfo.architecture}</div>
+          <div>Device={gpuDevice.adapterInfo.device}</div>
+          <div>Description={gpuDevice.adapterInfo.description}</div>
+          <div>
+            maxBufferSize=
+            {gpuDevice.adapter.limits.maxBufferSize / (1024 * 1024)} MB
+          </div>
+        </GroupBox>
+      )}
+      <GroupBox label="Encoding/Decoding"></GroupBox>
+    </div>
   );
 };
 
@@ -168,24 +190,30 @@ const SettingsTab = ({
         <TextInput
           value={stopStrings?.join(",")}
           multiline
-          rows={3}
+          rows={2}
           onChange={(e) => setStopStrings(e.target.value.split(","))}
           placeholder="Stop Strings"
         />
       </GroupBox>
-      <GroupBox label="Assistant Role Name">
-        <TextInput
-          value={assistantRoleName}
-          onChange={(e) => setAssistantRoleName(e.target.value)}
-          placeholder="Assistant Role Name"
-        />
-      </GroupBox>
-      <GroupBox label="User Role Name">
-        <TextInput
-          value={userRoleName}
-          onChange={(e) => setUserRoleName(e.target.value)}
-          placeholder="User Role Name"
-        />
+      <GroupBox label={"Role Names"}>
+        <div style={{ display: "flex" }}>
+          <div>
+            <div>Bot</div>
+            <TextInput
+              value={assistantRoleName}
+              onChange={(e) => setAssistantRoleName(e.target.value)}
+              placeholder="Assistant Role Name"
+            />
+          </div>
+          <div>
+            <div>User</div>
+            <TextInput
+              value={userRoleName}
+              onChange={(e) => setUserRoleName(e.target.value)}
+              placeholder="User Role Name"
+            />
+          </div>
+        </div>
       </GroupBox>
       <GroupBox label={"Sound Level"}>
         <Slider

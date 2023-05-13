@@ -201,7 +201,7 @@ export class LLMInstanceScope {
     const { conversation, maxTokens, assistantRoleName, stopTexts } = request;
     const tokens = await this.getTokens(conversation, maxTokens);
     tokens.push(...(await this.tokenizer.encodeIds(`${assistantRoleName}:`)));
-    console.log("decoded: ", await this.tokenizer.decodeIds(tokens));
+    console.log("debug: ", await this.tokenizer.decodeIds(tokens));
 
     const inputTokenLength = tokens.length;
     let outputText = "";

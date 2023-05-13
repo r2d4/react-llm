@@ -34,7 +34,7 @@ export default function Chat() {
   const [screenName, setScreenName] = useState("endlessbox5");
   const [stopStrings, setStopStrings] = useState(["user:", "assistant:"]);
   const [maxTokens, setMaxTokens] = useState(100);
-  const [soundLevel, setSoundLevel] = useState(0.5);
+  const [soundLevel, setSoundLevel] = useState(0.2);
   const [theme, setTheme] = useState({
     value: original,
     label: "Original",
