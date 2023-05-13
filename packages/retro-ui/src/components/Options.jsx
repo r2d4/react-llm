@@ -180,7 +180,7 @@ const SettingsTab = ({
           placeholder="User Role Name"
         />
       </GroupBox>
-      <GroupBox label={"Theme"} style={{ width: "100%" }}>
+      <GroupBox label={"Theme"}>
         <Select
           fullWidth
           style={{ width: "100%" }}
