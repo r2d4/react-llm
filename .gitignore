@@ -2,4 +2,3 @@ node_modules
 **/*.tsbuildinfo
 **/**/.next
 **/**/node_modules
-**/dist
