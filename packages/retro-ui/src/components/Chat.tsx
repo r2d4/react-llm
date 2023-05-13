@@ -1,7 +1,6 @@
 "use client";
 import localFont from "next/font/local";
 import { useState } from "react";
-import highcontrast from "react95/dist/themes/highcontrast";
 import matrix from "react95/dist/themes/matrix";
 import millenium from "react95/dist/themes/millenium";
 import original from "react95/dist/themes/original";
@@ -20,10 +19,6 @@ export const themeList = [
   {
     value: matrix,
     label: "Matrix",
-  },
-  {
-    value: highcontrast,
-    label: "High Contrast",
   },
   {
     value: millenium,
