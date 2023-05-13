@@ -661,7 +661,7 @@ export class WebGPUContext {
         if (this.debugLogFinish) {
           const currCounter = this.shaderSubmitCounter;
           this.device.queue.onSubmittedWorkDone().then(() => {
-            console.log("[" + currCounter + "][Debug] finish shader" + finfo.name);
+            // console.log("[" + currCounter + "][Debug] finish shader" + finfo.name);
           });
         }
         this.shaderSubmitCounter += 1;

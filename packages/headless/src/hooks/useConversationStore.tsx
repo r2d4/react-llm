@@ -67,7 +67,6 @@ const useConversationStore = create<ConversationStore>()(
           });
         },
         deleteConversation(conversationId: string) {
-          console.log("delete", conversationId);
           set((state) => {
             return {
               conversations: state.conversations.filter(

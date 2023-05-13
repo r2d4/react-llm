@@ -239,9 +239,7 @@ export class LLMInstanceScope {
       }
       let stop = false;
       for (let i = 0; i < stopTexts.length; i++) {
-        console.log("outputText.endsWith(stopTexts[i])", outputText.endsWith(stopTexts[i]), stopTexts[i], outputText)
         if (outputText.endsWith(stopTexts[i])) {
-          console.log("true!")
           outputText = outputText.substring(
             0,
             outputText.length - stopTexts[i].length
@@ -295,7 +293,6 @@ export class LLMInstanceScope {
   }
 
   clearKVCache() {
-    console.log("cleared conversation attention kv cache")
     this.fclearKVCaches(this.kvCache);
     this.kvCacheLength = 0;
     this.lastMessageId = "";

@@ -13,14 +13,28 @@ import {
 import Loader from "./Loader";
 import MessageList from "./MessageList";
 
+import useSound from "use-sound";
+
 function ChatWindow({
   stopStrings,
   maxTokens,
   screenName = "endlessbox5",
   assistantScreenName = "SmartestChild",
+  soundLevel,
 }) {
-  const { loadingStatus, send, isGenerating } = useLLM();
+  const { loadingStatus, send, isGenerating, setOnMessage } = useLLM();
   const [userInput, setUserInput] = useState("");
+  const [playSend] = useSound("/sounds/imsend.wav", { volume: soundLevel });
+  const [playRcv] = useSound("/sounds/imrcv.wav", { volume: soundLevel });
+
+  useEffect(() => {
+    const cb = () => (resp) => {
+      if (resp.step === 1) {
+        playRcv();
+      }
+    };
+    setOnMessage(cb);
+  }, [setOnMessage, playRcv]);
 
   const handleChange = (event) => {
     setUserInput(event.target.value);
@@ -32,9 +46,18 @@ function ChatWindow({
     if (isGenerating || !isReady) {
       return;
     }
+    playSend();
     send(userInput, maxTokens, stopStrings);
     setUserInput("");
-  }, [userInput, send, isGenerating, isReady, maxTokens, stopStrings]);
+  }, [
+    userInput,
+    send,
+    isGenerating,
+    isReady,
+    maxTokens,
+    stopStrings,
+    playSend,
+  ]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {

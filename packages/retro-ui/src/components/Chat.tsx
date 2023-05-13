@@ -9,7 +9,7 @@ import { ThemeProvider } from "styled-components";
 import ChatWindow from "./ChatWindow";
 import ConversationList from "./ConversationList";
 import Options from "./Options";
-const myFont = localFont({ src: "./ms_sans_serif.woff2" });
+const myFont = localFont({ src: "../assets/fonts/ms_sans_serif.woff2" });
 
 export const themeList = [
   {
@@ -34,6 +34,7 @@ export default function Chat() {
   const [screenName, setScreenName] = useState("endlessbox5");
   const [stopStrings, setStopStrings] = useState(["user:", "assistant:"]);
   const [maxTokens, setMaxTokens] = useState(100);
+  const [soundLevel, setSoundLevel] = useState(0.5);
   const [theme, setTheme] = useState({
     value: original,
     label: "Original",
@@ -61,6 +62,7 @@ export default function Chat() {
               assistantScreenName={"SmartestChild"}
               maxTokens={maxTokens}
               stopStrings={stopStrings}
+              soundLevel={soundLevel}
             />
             <Options
               screenName={screenName}
@@ -71,6 +73,8 @@ export default function Chat() {
               setMaxTokens={setMaxTokens}
               theme={theme}
               setTheme={setTheme}
+              soundLevel={soundLevel}
+              setSoundLevel={setSoundLevel}
             />
           </div>
         </div>

@@ -41,6 +41,9 @@ export type UseLLMResponse = {
   deleteMessages: () => void;
   setConversationTitle: (conversationId: string, title: string) => void;
 
+  onMessage: (msg: GenerateTextResponse) => void;
+  setOnMessage: (cb: (msg: GenerateTextResponse) => void) => void;
+
   userRoleName: string;
   setUserRoleName: (roleName: string) => void;
 
@@ -61,11 +64,14 @@ export const useLLMContext = (): UseLLMResponse => {
   const [assistantRoleName, setAssistantRoleName] =
     useState<string>("assistant");
 
+  const [onMessage, setOnMessage] = useState<any>();
+
   const addMessage = useCallback(
     (resp: GenerateTextResponse) => {
       if (resp.isFinished) {
         setIsGenerating(false);
       }
+      if (onMessage) onMessage(resp);
       cStore?.addMessage(cStore?.currentConversationId, {
         id: resp.requestId,
         createdAt: new Date().getTime(),
@@ -74,7 +80,7 @@ export const useLLMContext = (): UseLLMResponse => {
         text: resp.outputText,
       });
     },
-    [cStore, cStore?.currentConversationId]
+    [cStore, cStore?.currentConversationId, onMessage, setOnMessage]
   );
 
   useEffect(() => {
@@ -104,7 +110,6 @@ export const useLLMContext = (): UseLLMResponse => {
       text: msg,
     });
     setIsGenerating(true);
-    console.log("right before generated");
     workerRef?.current?.generate(
       {
         conversation: currentConversation,
@@ -147,6 +152,9 @@ export const useLLMContext = (): UseLLMResponse => {
       cStore?.deleteConversation(id);
     },
     deleteMessages: () => cStore?.deleteMessages(cStore?.currentConversationId),
+
+    onMessage,
+    setOnMessage,
 
     loadingStatus,
     isGenerating,

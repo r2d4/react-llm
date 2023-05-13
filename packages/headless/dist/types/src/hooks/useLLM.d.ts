@@ -1,5 +1,6 @@
 import { InitProgressReport } from "@/worker/lib/tvm/runtime";
 import { Conversation } from "../types/chat";
+import { GenerateTextResponse } from "../types/worker_message";
 export type UseLLMParams = {
     autoInit?: boolean;
 };
@@ -14,6 +15,8 @@ export type UseLLMResponse = {
     deleteAllConversations: () => void;
     deleteMessages: () => void;
     setConversationTitle: (conversationId: string, title: string) => void;
+    onMessage: (msg: GenerateTextResponse) => void;
+    setOnMessage: (cb: (msg: GenerateTextResponse) => void) => void;
     userRoleName: string;
     setUserRoleName: (roleName: string) => void;
     assistantRoleName: string;

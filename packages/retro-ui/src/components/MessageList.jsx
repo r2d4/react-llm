@@ -20,10 +20,10 @@ function MessageList({
   }, [conversation]);
 
   return (
-    <ScrollView
-      style={{ height: "300px", width: "400px", background: "white" }}
-    >
-      <Frame style={{ padding: "2px" }} variant="field">
+    <Frame variant="field">
+      <ScrollView
+        style={{ height: "300px", width: "400px", background: "white" }}
+      >
         {conversation?.messages.map((m) => (
           <div key={m.id} style={{ display: "flex" }}>
             <div
@@ -45,8 +45,8 @@ function MessageList({
           </div>
         ))}
         <div ref={scrollRef}></div>
-      </Frame>
-    </ScrollView>
+      </ScrollView>
+    </Frame>
   );
 }
 

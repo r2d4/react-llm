@@ -5,6 +5,7 @@ import {
   GroupBox,
   NumberInput,
   Select,
+  Slider,
   Tab,
   Tabs,
   TextInput,
@@ -24,6 +25,8 @@ const Options = ({
   setMaxTokens,
   theme,
   setTheme,
+  soundLevel,
+  setSoundLevel,
 }) => {
   const { conversation } = useLLM();
   const [activeTab, setActiveTab] = useState(0);
@@ -57,6 +60,8 @@ const Options = ({
             setMaxTokens={setMaxTokens}
             theme={theme}
             setTheme={setTheme}
+            soundLevel={soundLevel}
+            setSoundLevel={setSoundLevel}
           />
         )}
       </WindowContent>
@@ -123,6 +128,8 @@ const SettingsTab = ({
   setMaxTokens,
   theme,
   setTheme,
+  soundLevel,
+  setSoundLevel,
 }) => {
   const {
     init,
@@ -180,6 +187,17 @@ const SettingsTab = ({
           placeholder="User Role Name"
         />
       </GroupBox>
+      <GroupBox label={"Sound Level"}>
+        <Slider
+          min={0}
+          max={1}
+          step={0.1}
+          value={soundLevel}
+          defaultValue={soundLevel}
+          marks={Array.from({ length: 11 }, (_, i) => ({ value: i / 10 }))}
+          onChange={setSoundLevel}
+        />
+      </GroupBox>
       <GroupBox label={"Theme"}>
         <Select
           fullWidth
@@ -209,7 +227,9 @@ const AboutTab = () => {
           storage.
         </p>
         <p>WebGPU is only supported in Desktop Google Chrome 113</p>
-        <p>Powered by Apache TVM and MLC Relax Runtime.</p>
+        <p>
+          Powered by Apache TVM and MLC Relax Runtime. Vicuna trained by LMSys
+        </p>
       </div>
       <GroupBox label="Model">
         <a href="https://lmsys.org/blog/2023-03-30-vicuna/" target="_blank">

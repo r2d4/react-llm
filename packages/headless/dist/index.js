@@ -924,7 +924,6 @@ var useConversationStore = create()(persist(function (set, get) {
             });
         },
         deleteConversation: function (conversationId) {
-            console.log("delete", conversationId);
             set(function (state) {
                 return {
                     conversations: state.conversations.filter(function (c) { return c.id !== conversationId; }),
@@ -1023,10 +1022,13 @@ var useLLMContext = function () {
     var cStore = useStore(useConversationStore, function (state) { return state; });
     var _c = useState("user"), userRoleName = _c[0], setUserRoleName = _c[1];
     var _d = useState("assistant"), assistantRoleName = _d[0], setAssistantRoleName = _d[1];
+    var _e = useState(), onMessage = _e[0], setOnMessage = _e[1];
     var addMessage = useCallback(function (resp) {
         if (resp.isFinished) {
             setIsGenerating(false);
         }
+        if (onMessage)
+            onMessage(resp);
         cStore === null || cStore === void 0 ? void 0 : cStore.addMessage(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId, {
             id: resp.requestId,
             createdAt: new Date().getTime(),
@@ -1034,10 +1036,10 @@ var useLLMContext = function () {
             role: assistantRoleName,
             text: resp.outputText,
         });
-    }, [cStore, cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId]);
+    }, [cStore, cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId, onMessage, setOnMessage]);
     useEffect(function () {
         if (!workerRef.current) {
-            workerRef.current = wrap(new Worker(new URL("worker-2bdc2226.js", import.meta.url)));
+            workerRef.current = wrap(new Worker(new URL("worker-6c9a2e2e.js", import.meta.url)));
         }
     }, []);
     var send = function (msg, maxTokens, stopStrings) {
@@ -1056,7 +1058,6 @@ var useLLMContext = function () {
             text: msg,
         });
         setIsGenerating(true);
-        console.log("right before generated");
         (_a = workerRef === null || workerRef === void 0 ? void 0 : workerRef.current) === null || _a === void 0 ? void 0 : _a.generate({
             conversation: currentConversation,
             stopTexts: stopStrings,
@@ -1088,6 +1089,8 @@ var useLLMContext = function () {
             cStore === null || cStore === void 0 ? void 0 : cStore.deleteConversation(id);
         },
         deleteMessages: function () { return cStore === null || cStore === void 0 ? void 0 : cStore.deleteMessages(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId); },
+        onMessage: onMessage,
+        setOnMessage: setOnMessage,
         loadingStatus: loadingStatus,
         isGenerating: isGenerating,
         userRoleName: userRoleName,

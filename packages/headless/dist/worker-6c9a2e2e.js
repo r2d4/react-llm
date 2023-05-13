@@ -1119,9 +1119,9 @@ var WebGPUContext = /** @class */ (function () {
                 var command = commandEncoder.finish();
                 _this.device.queue.submit([command]);
                 if (_this.debugLogFinish) {
-                    var currCounter_1 = _this.shaderSubmitCounter;
+                    _this.shaderSubmitCounter;
                     _this.device.queue.onSubmittedWorkDone().then(function () {
-                        console.log("[" + currCounter_1 + "][Debug] finish shader" + finfo.name);
+                        // console.log("[" + currCounter + "][Debug] finish shader" + finfo.name);
                     });
                 }
                 _this.shaderSubmitCounter += 1;
@@ -3560,9 +3560,7 @@ var LLMInstanceScope = /** @class */ (function () {
                         }
                         stop_1 = false;
                         for (i = 0; i < stopTexts.length; i++) {
-                            console.log("outputText.endsWith(stopTexts[i])", outputText.endsWith(stopTexts[i]), stopTexts[i], outputText);
                             if (outputText.endsWith(stopTexts[i])) {
-                                console.log("true!");
                                 outputText = outputText.substring(0, outputText.length - stopTexts[i].length);
                                 stop_1 = true;
                                 break;
@@ -3619,7 +3617,6 @@ var LLMInstanceScope = /** @class */ (function () {
         }
     };
     LLMInstanceScope.prototype.clearKVCache = function () {
-        console.log("cleared conversation attention kv cache");
         this.fclearKVCaches(this.kvCache);
         this.kvCacheLength = 0;
         this.lastMessageId = "";
