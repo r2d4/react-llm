@@ -31,6 +31,23 @@ const Loader = () => {
             gap: "10px",
           }}
         >
+          <div className="lg:hidden">
+            <p className="p-1">
+              A Large Language Model that runs entirely in the browser with
+              WebGPU.
+            </p>
+            <p className="p-1">
+              No data is sent to the server. Conversations are cached in local
+              storage.
+            </p>
+            <p className="p-1">
+              WebGPU is only supported in Desktop Google Chrome 113
+            </p>
+            <p className="p-1">
+              Powered by Apache TVM and MLC Relax Runtime. Vicuna trained by
+              LMSys
+            </p>
+          </div>
           <div>
             This will download the model and may take a few minutes. After the
             first time, it will be cached.
