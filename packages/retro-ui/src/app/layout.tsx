@@ -3,7 +3,7 @@ import React from "react";
 import "../styles/globals.css";
 
 export const metadata = {
-  title: "AI Instant Messenger",
+  title: "AIM: AI Instant Messenger",
   description: "Chat with an in-browser Vicuna LLM model",
 };
 
