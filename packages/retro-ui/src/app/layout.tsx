@@ -22,6 +22,11 @@ export default function RootLayout({
         {children}
       </body>
       <Script
+        async
+        rel="preconnect"
+        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+      />
+      <Script
         id={"google-analytics"}
         dangerouslySetInnerHTML={{
           __html: `

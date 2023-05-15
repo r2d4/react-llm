@@ -73,7 +73,7 @@ function ChatWindow({
   }, [handleSubmit]);
 
   return (
-    <Window fullWidth className="window w-[500px]">
+    <Window fullWidth className="window sm:w-[500px] w-full">
       <WindowHeader className="window-header">
         <span>Instant Message with {assistantScreenName}</span>
       </WindowHeader>

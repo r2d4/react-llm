@@ -81,7 +81,7 @@ export default function Chat() {
           <div className="hidden lg:block">
             <ConversationList />
           </div>
-          <div className="w-[500px]">
+          <div className="sm:w-[500px] w-full">
             <ChatWindow
               screenName={screenName}
               assistantScreenName={"SmartestChild"}
@@ -106,7 +106,7 @@ export default function Chat() {
           </div>
           <div className="lg:hidden bottom-0 left-0 fixed w-full">
             <AppBar position={"absolute bottom" as CSSProperties["position"]}>
-              <div className="flex gap-8 p-2 items-center">
+              <div className="flex gap-2 sm:gap-8 p-2 items-center">
                 <div>
                   <Button
                     fullWidth
