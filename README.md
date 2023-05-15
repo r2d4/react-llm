@@ -1,16 +1,16 @@
 # @react-llm/headless
 
-Easy to use headless React Hooks to run LLMs in the browser with WebGPU. As simple as `useLLM()`.
+Easy-to-use headless React Hooks to run LLMs in the browser with WebGPU. As simple as `useLLM()`.
 
 ### [**Live Demo**](https://chat.matt-rickard.com)
 
 ![image](assets/demo.webp)
 
-Features:
+**Features**:
 
-* Supports Vicuna 13B
+* Supports [Vicuna 13B](https://lmsys.org/blog/2023-03-30-vicuna/)
 * Use custom system prompts and "user:"/"assistant:" role names
-* Completion options like max tokens and stop sequences
+* Completion options like `max tokens` and `stop sequences`
 * No data leaves the browser. Accelerated via WebGPU.
 * Hooks built to 'Bring your own UI'
 * Persistent storage for conversations in browser storage. Hooks for loading and saving conversations.
@@ -89,6 +89,12 @@ const MyComponent = () => {
 };
 ```
 
+
+### Packages
+
+* `@react-llm/headless` - Headless React Hooks for running LLMs in the browser
+* `@react-llm/retro-ui` - Retro-themed UI for the hooks
+
 ## How does it work?
 
 This library is a set of React Hooks that provide a simple interface to run LLMs in the browser. It uses Vicuna 13B.
@@ -117,4 +123,4 @@ pnpm dev
 ### License
 MIT
 
-(The code under `packages/headless/worker/lib/tvm` is licensed under Apache 2.0)
+The code under `packages/headless/worker/lib/tvm` is licensed under Apache 2.0.

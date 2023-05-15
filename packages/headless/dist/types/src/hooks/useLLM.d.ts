@@ -30,7 +30,7 @@ export type UseLLMResponse = {
     assistantRoleName: string;
     setAssistantRoleName: (roleName: string) => void;
     gpuDevice: GPUDeviceInfo;
-    send: (msg: string) => void;
+    send: (text: string, maxToken: number, stopSequences: string[]) => void;
     init: () => void;
 };
 export declare const useLLMContext: () => UseLLMResponse;

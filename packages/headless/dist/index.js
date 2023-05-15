@@ -1077,7 +1077,7 @@ var useLLMContext = function () {
             workerRef.current = wrap(new Worker(new URL("worker-cc79b531.js", import.meta.url)));
         }
     }, []);
-    var send = function (msg, maxTokens, stopStrings) {
+    var send = function (text, maxTokens, stopStrings) {
         var _a;
         if (maxTokens === void 0) { maxTokens = 100; }
         if (stopStrings === void 0) { stopStrings = [userRoleName, assistantRoleName]; }
@@ -1090,7 +1090,7 @@ var useLLMContext = function () {
             createdAt: new Date().getTime(),
             updatedAt: new Date().getTime(),
             role: userRoleName,
-            text: msg,
+            text: text,
         });
         setIsGenerating(true);
         (_a = workerRef === null || workerRef === void 0 ? void 0 : workerRef.current) === null || _a === void 0 ? void 0 : _a.generate({
