@@ -1,6 +1,6 @@
 {
   "name": "@react-llm/headless",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Matt Rickard <npm@matt-rickard.com>",
   "license": "MIT",
   "module": "dist/index.js",

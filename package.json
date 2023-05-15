@@ -12,7 +12,7 @@
     "packages/retro-ui"
   ],
   "scripts": {
-    "publish": "pnpm publish --access public",
+    "publish": "pnpm publish --filter ./packages/* ",
     "build": "pnpm recursive run build"
   },
   "devDependencies": {
