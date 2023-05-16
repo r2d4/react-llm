@@ -1,5 +1,62 @@
 import require$$0, { useDebugValue, useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
-import { v as v4, _ as __spreadArray, a as __assign, d as detectGPUDevice, w as wrap, p as proxy } from './v4-2119d9d5.js';
+import { d as detectGPUDevice, w as wrap, p as proxy } from './comlink-34a1f4b2.js';
+
+// Unique ID creation requires a high quality random # generator. In the browser we therefore
+// require the crypto API and do not support built-in fallback to lower quality random number
+// generators (like Math.random()).
+let getRandomValues;
+const rnds8 = new Uint8Array(16);
+function rng() {
+  // lazy load so that environments that need to polyfill have a chance to do so
+  if (!getRandomValues) {
+    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation.
+    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
+    if (!getRandomValues) {
+      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
+    }
+  }
+  return getRandomValues(rnds8);
+}
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+
+const byteToHex = [];
+for (let i = 0; i < 256; ++i) {
+  byteToHex.push((i + 0x100).toString(16).slice(1));
+}
+function unsafeStringify(arr, offset = 0) {
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+}
+
+const randomUUID = typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+var native = {
+  randomUUID
+};
+
+function v4(options, buf, offset) {
+  if (native.randomUUID && !buf && !options) {
+    return native.randomUUID();
+  }
+  options = options || {};
+  const rnds = options.random || (options.rng || rng)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+  if (buf) {
+    offset = offset || 0;
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+    return buf;
+  }
+  return unsafeStringify(rnds);
+}
 
 const createStoreImpl = createState => {
   let state;
@@ -889,9 +946,9 @@ const persistImpl = (config, baseOptions) => {
 };
 const persist = persistImpl;
 
-var defaultSystemPrompt = "A chat between a curious user and a AI chatbot named SmartestChild on AIM who responds with lowercase, frequent emojis, and 2000s internet abbreviations.";
-var useConversationStore = create()(persist(function (set, get) {
-    var initialConversation = {
+const defaultSystemPrompt = "A chat between a curious user and a AI chatbot named SmartestChild on AIM who responds with lowercase, frequent emojis, and 2000s internet abbreviations.";
+const useConversationStore = create()(persist((set, get) => {
+    const initialConversation = {
         id: v4(),
         title: "Untitled",
         updatedAt: new Date().getTime(),
@@ -902,111 +959,134 @@ var useConversationStore = create()(persist(function (set, get) {
     return {
         conversations: [initialConversation],
         currentConversationId: initialConversation.id,
-        createConversation: function (conversation) {
-            set(function (state) {
+        createConversation: (conversation) => {
+            set((state) => {
                 return {
                     currentConversationId: conversation.id,
-                    conversations: __spreadArray(__spreadArray([], state.conversations, true), [conversation], false),
+                    conversations: [...state.conversations, conversation],
                 };
             });
         },
-        setConversationTitle: function (conversationId, title) {
-            set(function (state) {
-                var conversation = state.conversations.find(function (c) { return c.id === conversationId; });
+        setConversationTitle(conversationId, title) {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
                 if (!conversation) {
                     return state;
                 }
                 return {
-                    conversations: __spreadArray(__spreadArray([], state.conversations.filter(function (c) { return c.id !== conversationId; }), true), [
-                        __assign(__assign({}, conversation), { title: title }),
-                    ], false),
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            title,
+                        },
+                    ],
                 };
             });
         },
-        deleteConversation: function (conversationId) {
-            set(function (state) {
+        deleteConversation(conversationId) {
+            set((state) => {
                 return {
-                    conversations: state.conversations.filter(function (c) { return c.id !== conversationId; }),
+                    conversations: state.conversations.filter((c) => c.id !== conversationId),
                 };
             });
         },
-        setConversationId: function (conversationId) {
-            var conversationExists = get().conversations.some(function (c) { return c.id === conversationId; });
+        setConversationId: (conversationId) => {
+            const conversationExists = get().conversations.some((c) => c.id === conversationId);
             if (!conversationExists) {
                 throw new Error("Invalid conversation id");
             }
-            set(function (state) {
-                return __assign(__assign({}, state), { currentConversationId: conversationId });
+            set((state) => {
+                return {
+                    ...state,
+                    currentConversationId: conversationId,
+                };
             });
         },
-        deleteAllConversations: function () {
-            set(function (state) {
+        deleteAllConversations: () => {
+            set((state) => {
                 return {
                     conversations: [],
                 };
             });
         },
-        deleteMessages: function (conversationId) {
-            set(function (state) {
-                var conversation = state.conversations.find(function (c) { return c.id === conversationId; });
+        deleteMessages: (conversationId) => {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
                 if (!conversation) {
                     return state;
                 }
                 return {
-                    conversations: __spreadArray(__spreadArray([], state.conversations.filter(function (c) { return c.id !== conversationId; }), true), [
-                        __assign(__assign({}, conversation), { updatedAt: new Date().getTime(), messages: [] }),
-                    ], false),
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            updatedAt: new Date().getTime(),
+                            messages: [],
+                        },
+                    ],
                 };
             });
         },
-        getConversation: function (conversationId) {
-            return get().conversations.find(function (c) { return c.id === conversationId; });
+        getConversation(conversationId) {
+            return get().conversations.find((c) => c.id === conversationId);
         },
-        getAllConversations: function () {
+        getAllConversations() {
             return get().conversations;
         },
-        addMessage: function (conversationId, message) {
-            set(function (state) {
-                var conversation = state.conversations.find(function (c) { return c.id === conversationId; });
+        addMessage: (conversationId, message) => {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
                 if (!conversation) {
                     return state;
                 }
-                var existingMessage = conversation.messages.find(function (m) { return m.id === message.id; });
+                const existingMessage = conversation.messages.find((m) => m.id === message.id);
                 if (existingMessage) {
                     // Update message
                     return {
-                        conversations: __spreadArray(__spreadArray([], state.conversations.filter(function (c) { return c.id !== conversationId; }), true), [
-                            __assign(__assign({}, conversation), { updatedAt: new Date().getTime(), messages: __spreadArray(__spreadArray([], conversation.messages.filter(function (m) { return m.id !== message.id; }), true), [
+                        conversations: [
+                            ...state.conversations.filter((c) => c.id !== conversationId),
+                            {
+                                ...conversation,
+                                updatedAt: new Date().getTime(),
+                                messages: [
+                                    ...conversation.messages.filter((m) => m.id !== message.id),
                                     message,
-                                ], false) }),
-                        ], false),
+                                ],
+                            },
+                        ],
                     };
                 }
                 // Add message
                 return {
-                    conversations: __spreadArray(__spreadArray([], state.conversations.filter(function (c) { return c.id !== conversationId; }), true), [
-                        __assign(__assign({}, conversation), { updatedAt: new Date().getTime(), messages: __spreadArray(__spreadArray([], conversation.messages, true), [message], false) }),
-                    ], false),
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            updatedAt: new Date().getTime(),
+                            messages: [...conversation.messages, message],
+                        },
+                    ],
                 };
             });
         },
     };
 }, {
     name: "chat-store",
-    getStorage: function () { return sessionStorage; },
+    getStorage: () => sessionStorage,
 }));
 
 // https://github.com/pmndrs/zustand/blob/65d2bc0660ab0d542cf9f97a3b004754ffa73f3e/docs/integrations/persisting-store-data.md?plain=1#L471-L488
-var useStore = function (store, callback) {
-    var result = store(callback);
-    var _a = useState(), data = _a[0], setData = _a[1];
-    useEffect(function () {
+const useStore = (store, callback) => {
+    const result = store(callback);
+    const [data, setData] = useState();
+    useEffect(() => {
         setData(result);
     }, [result]);
     return data;
 };
 
-var initialProgress = {
+const initialProgress = {
     type: "init",
     progress: 0,
     timeElapsed: 0,
@@ -1015,24 +1095,24 @@ var initialProgress = {
     fetchedBytes: 0,
     totalBytes: 0,
 };
-var useLLMContext = function () {
-    var _a = useState(initialProgress), loadingStatus = _a[0], setLoadingStatus = _a[1];
-    var _b = useState(false), isGenerating = _b[0], setIsGenerating = _b[1];
-    var workerRef = useRef();
-    var cStore = useStore(useConversationStore, function (state) { return state; });
-    var _c = useState("user"), userRoleName = _c[0], setUserRoleName = _c[1];
-    var _d = useState("assistant"), assistantRoleName = _d[0], setAssistantRoleName = _d[1];
-    var _e = useState({
+const useLLMContext = (props = {}) => {
+    const [loadingStatus, setLoadingStatus] = useState(initialProgress);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const workerRef = useRef();
+    const cStore = useStore(useConversationStore, (state) => state);
+    const [userRoleName, setUserRoleName] = useState("user");
+    const [assistantRoleName, setAssistantRoleName] = useState("assistant");
+    const [gpuDevice, setGpuDevice] = useState({
         adapter: null,
         device: null,
         adapterInfo: null,
         checked: false,
         unsupportedReason: null,
-    }), gpuDevice = _e[0], setGpuDevice = _e[1];
-    useEffect(function () {
+    });
+    useEffect(() => {
         if (!gpuDevice || !gpuDevice.checked) {
             detectGPUDevice()
-                .then(function (resp) {
+                .then((resp) => {
                 if (resp) {
                     setGpuDevice({
                         unsupportedReason: null,
@@ -1043,10 +1123,14 @@ var useLLMContext = function () {
                     });
                 }
                 else {
-                    setGpuDevice(__assign(__assign({}, gpuDevice), { checked: true, unsupportedReason: "GPU is not supported" }));
+                    setGpuDevice({
+                        ...gpuDevice,
+                        checked: true,
+                        unsupportedReason: "GPU is not supported",
+                    });
                 }
             })
-                .catch(function (err) {
+                .catch((err) => {
                 setGpuDevice({
                     adapter: null,
                     device: null,
@@ -1057,100 +1141,101 @@ var useLLMContext = function () {
             });
         }
     }, []);
-    var _f = useState(), onMessage = _f[0], setOnMessage = _f[1];
-    var addMessage = useCallback(function (resp) {
+    const [onMessage, setOnMessage] = useState();
+    const addMessage = useCallback((resp) => {
         if (resp.isFinished) {
             setIsGenerating(false);
         }
         if (onMessage)
             onMessage(resp);
-        cStore === null || cStore === void 0 ? void 0 : cStore.addMessage(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId, {
+        cStore?.addMessage(cStore?.currentConversationId, {
             id: resp.requestId,
             createdAt: new Date().getTime(),
             updatedAt: new Date().getTime(),
             role: assistantRoleName,
             text: resp.outputText,
         });
-    }, [cStore, cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId, onMessage, setOnMessage]);
-    useEffect(function () {
+    }, [cStore, cStore?.currentConversationId, onMessage, setOnMessage]);
+    useEffect(() => {
         if (!workerRef.current) {
-            workerRef.current = wrap(new Worker(new URL("worker-cc79b531.js", import.meta.url)));
+            if (props.api) {
+                workerRef.current = props.api;
+            }
+            else {
+                workerRef.current = wrap(new Worker(new URL("worker-d7232018.js", import.meta.url)));
+            }
         }
-    }, []);
-    var send = function (text, maxTokens, stopStrings) {
-        var _a;
-        if (maxTokens === void 0) { maxTokens = 100; }
-        if (stopStrings === void 0) { stopStrings = [userRoleName, assistantRoleName]; }
-        var currentConversation = cStore === null || cStore === void 0 ? void 0 : cStore.getConversation(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId);
+    }, [props.api]);
+    const send = (text, maxTokens = 100, stopStrings = [userRoleName, assistantRoleName]) => {
+        const currentConversation = cStore?.getConversation(cStore?.currentConversationId);
         if (!currentConversation) {
             throw new Error("Invalid conversation id");
         }
-        currentConversation === null || currentConversation === void 0 ? void 0 : currentConversation.messages.push({
+        currentConversation?.messages.push({
             id: v4(),
             createdAt: new Date().getTime(),
             updatedAt: new Date().getTime(),
             role: userRoleName,
-            text: text,
+            text,
         });
         setIsGenerating(true);
-        (_a = workerRef === null || workerRef === void 0 ? void 0 : workerRef.current) === null || _a === void 0 ? void 0 : _a.generate({
+        workerRef?.current?.generate({
             conversation: currentConversation,
             stopTexts: stopStrings,
-            maxTokens: maxTokens,
-            assistantRoleName: assistantRoleName,
+            maxTokens,
+            assistantRoleName,
         }, proxy(addMessage));
     };
     return {
-        conversation: cStore === null || cStore === void 0 ? void 0 : cStore.getConversation(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId),
-        allConversations: cStore === null || cStore === void 0 ? void 0 : cStore.conversations.sort(function (a, b) { return b.updatedAt - a.updatedAt; }),
-        createConversation: function (title, prompt) {
-            var id = v4();
-            cStore === null || cStore === void 0 ? void 0 : cStore.createConversation({
-                id: id,
-                title: title !== null && title !== void 0 ? title : "Untitled",
-                systemPrompt: prompt !== null && prompt !== void 0 ? prompt : defaultSystemPrompt,
+        conversation: cStore?.getConversation(cStore?.currentConversationId),
+        allConversations: cStore?.conversations.sort((a, b) => b.updatedAt - a.updatedAt),
+        createConversation: (title, prompt) => {
+            const id = v4();
+            cStore?.createConversation({
+                id,
+                title: title ?? "Untitled",
+                systemPrompt: prompt ?? defaultSystemPrompt,
                 messages: [],
                 createdAt: new Date().getTime(),
                 updatedAt: new Date().getTime(),
             });
         },
-        setConversationTitle: function (id, title) {
-            cStore === null || cStore === void 0 ? void 0 : cStore.setConversationTitle(id, title);
+        setConversationTitle: (id, title) => {
+            cStore?.setConversationTitle(id, title);
         },
-        setConversationId: function (id) {
-            cStore === null || cStore === void 0 ? void 0 : cStore.setConversationId(id);
+        setConversationId: (id) => {
+            cStore?.setConversationId(id);
         },
-        deleteConversation: function (id) {
-            cStore === null || cStore === void 0 ? void 0 : cStore.deleteConversation(id);
+        deleteConversation: (id) => {
+            cStore?.deleteConversation(id);
         },
-        deleteMessages: function () { return cStore === null || cStore === void 0 ? void 0 : cStore.deleteMessages(cStore === null || cStore === void 0 ? void 0 : cStore.currentConversationId); },
-        onMessage: onMessage,
-        setOnMessage: setOnMessage,
-        loadingStatus: loadingStatus,
-        isGenerating: isGenerating,
-        userRoleName: userRoleName,
-        setUserRoleName: setUserRoleName,
-        assistantRoleName: assistantRoleName,
-        setAssistantRoleName: setAssistantRoleName,
-        gpuDevice: gpuDevice,
-        send: send,
-        init: function () { var _a; return (_a = workerRef === null || workerRef === void 0 ? void 0 : workerRef.current) === null || _a === void 0 ? void 0 : _a.init(proxy(setLoadingStatus)); },
-        deleteAllConversations: function () { return cStore === null || cStore === void 0 ? void 0 : cStore.deleteAllConversations(); },
+        deleteMessages: () => cStore?.deleteMessages(cStore?.currentConversationId),
+        onMessage,
+        setOnMessage,
+        loadingStatus,
+        isGenerating,
+        userRoleName,
+        setUserRoleName,
+        assistantRoleName,
+        setAssistantRoleName,
+        gpuDevice,
+        send,
+        init: () => workerRef?.current?.init(proxy(setLoadingStatus)),
+        deleteAllConversations: () => cStore?.deleteAllConversations(),
     };
 };
 
-var ModelContext = createContext(null);
-var ModelProvider = function (_a) {
-    var children = _a.children;
-    var LLMValue = useLLMContext();
+const ModelContext = createContext(null);
+const ModelProvider = ({ children, config = {}, }) => {
+    const LLMValue = useLLMContext(config);
     return (require$$0.createElement(ModelContext.Provider, { value: LLMValue }, children));
 };
-var useLLM = function () {
-    var context = useContext(ModelContext);
+const useLLM = (props = {}) => {
+    const context = useContext(ModelContext);
     if (context === null) {
         throw new Error("useLLMContext must be used within a LLMProvider");
     }
     return context;
 };
 
-export { ModelProvider, useLLM as default };
+export { ModelProvider, useLLM as default, useLLM };

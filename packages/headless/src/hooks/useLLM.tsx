@@ -1,15 +1,15 @@
-import { detectGPUDevice } from "@/worker/lib/tvm";
-import { InitProgressReport } from "@/worker/lib/tvm/runtime";
+import {
+  Conversation,
+  GenerateTextRequest,
+  GenerateTextResponse,
+  InitResponse,
+  ModelAPI,
+  detectGPUDevice,
+} from "@react-llm/model";
 import * as Comlink from "comlink";
 import { Remote } from "comlink";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Conversation } from "../types/chat";
-import {
-  GenerateTextRequest,
-  GenerateTextResponse,
-  ModelWorker,
-} from "../types/worker_message";
 import useConversationStore, {
   defaultSystemPrompt,
 } from "./useConversationStore";
@@ -17,6 +17,7 @@ import useStore from "./useStore";
 
 export type UseLLMParams = {
   autoInit?: boolean;
+  api?: Remote<ModelAPI>;
 };
 
 const initialProgress = {
@@ -45,7 +46,7 @@ export type UseLLMResponse = {
   allConversations: Conversation[] | undefined;
 
   // LoadingStatus returns the current loading status.
-  loadingStatus: InitProgressReport;
+  loadingStatus: InitResponse;
 
   // IsGenerating returns whether the model is currently generating. Concurrent generation is not supported.
   isGenerating: boolean;
@@ -96,11 +97,11 @@ export type UseLLMResponse = {
   init: () => void;
 };
 
-export const useLLMContext = (): UseLLMResponse => {
+export const useLLMContext = (props = {} as UseLLMParams): UseLLMResponse => {
   const [loadingStatus, setLoadingStatus] =
-    useState<InitProgressReport>(initialProgress);
+    useState<InitResponse>(initialProgress);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const workerRef = useRef<Remote<ModelWorker>>();
+  const workerRef = useRef<Remote<ModelAPI>>();
   const cStore = useStore(useConversationStore, (state) => state);
   const [userRoleName, setUserRoleName] = useState<string>("user");
   const [assistantRoleName, setAssistantRoleName] =
@@ -167,11 +168,15 @@ export const useLLMContext = (): UseLLMResponse => {
 
   useEffect(() => {
     if (!workerRef.current) {
-      workerRef.current = Comlink.wrap(
-        new Worker(new URL("../worker/worker", import.meta.url))
-      );
+      if (props.api) {
+        workerRef.current = props.api;
+      } else {
+        workerRef.current = Comlink.wrap(
+          new Worker(new URL("../worker/worker", import.meta.url))
+        );
+      }
     }
-  }, []);
+  }, [props.api]);
 
   const send = (
     text: string,

@@ -1,9 +1,9 @@
 /// <reference types="@webgpu/types" />
-import { InitProgressReport } from "@/worker/lib/tvm/runtime";
-import { Conversation } from "../types/chat";
-import { GenerateTextResponse } from "../types/worker_message";
+import { Conversation, GenerateTextResponse, InitResponse, ModelAPI } from "@react-llm/model";
+import { Remote } from "comlink";
 export type UseLLMParams = {
     autoInit?: boolean;
+    api?: Remote<ModelAPI>;
 };
 export type GPUDeviceInfo = {
     adapter: GPUAdapter | null;
@@ -15,7 +15,7 @@ export type GPUDeviceInfo = {
 export type UseLLMResponse = {
     conversation: Conversation | undefined;
     allConversations: Conversation[] | undefined;
-    loadingStatus: InitProgressReport;
+    loadingStatus: InitResponse;
     isGenerating: boolean;
     createConversation: (title?: string, prompt?: string) => void;
     setConversationId: (conversationId: string) => void;
@@ -33,4 +33,4 @@ export type UseLLMResponse = {
     send: (text: string, maxToken: number, stopSequences: string[]) => void;
     init: () => void;
 };
-export declare const useLLMContext: () => UseLLMResponse;
+export declare const useLLMContext: (props?: UseLLMParams) => UseLLMResponse;

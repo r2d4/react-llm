@@ -1,4 +1,4 @@
-import { Conversation, Message } from "../types/chat";
+import { Conversation, Message } from "@react-llm/model";
 export interface ConversationStore {
     conversations: Conversation[];
     currentConversationId: string;

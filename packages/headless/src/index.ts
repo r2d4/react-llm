@@ -1,5 +1,4 @@
-
 import { ModelProvider, useLLM } from './providers/ModelProvider';
 
-export { ModelProvider };
+export { ModelProvider, useLLM };
 export default useLLM;

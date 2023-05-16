@@ -1,0 +1,18 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "types": [
+            "@webgpu/types"
+        ],
+        "target": "esnext",
+        "composite": true,
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+    },
+    "include": [
+        "./src/**/*.ts",
+    ],
+}

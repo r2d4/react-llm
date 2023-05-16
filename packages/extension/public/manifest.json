@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Thiggle Ext",
+  "version": "1.0",
+  "description": "This is my awesome Chrome extension.",
+  "background": {
+    "scripts": ["background.bundle.js"],
+    "persistent": true
+  },
+  "permissions": ["tabs", "storage"],
+  "browser_action": {
+    "default_title": "My Extension",
+    "default_popup": "index.html"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

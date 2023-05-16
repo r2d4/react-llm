@@ -5,6 +5,5 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "verbatimModuleSyntax": true
-  }
+  },
 }

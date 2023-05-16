@@ -8,18 +8,16 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
+    "packages/model",
     "packages/headless",
-    "packages/retro-ui"
+    "packages/retro-ui",
+    "packages/extension"
   ],
   "scripts": {
     "publish": "pnpm publish --filter ./packages/* ",
-    "build": "pnpm recursive run build"
+    "build": "pnpm recursive run clean && pnpm recursive run build"
   },
   "devDependencies": {
     "typescript": "^5.0.4"
-  },
-  "dependencies": {
-    "react95": "^4.0.0",
-    "styled-components": "^5.3.10"
   }
 }

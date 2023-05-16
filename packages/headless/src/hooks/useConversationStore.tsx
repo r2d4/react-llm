@@ -1,7 +1,7 @@
+import { Conversation, Message } from "@react-llm/model";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Conversation, Message } from "../types/chat";
 
 export interface ConversationStore {
   conversations: Conversation[];

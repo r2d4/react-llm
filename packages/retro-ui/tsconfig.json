@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -41,6 +41,9 @@
   "references": [
     {
       "path": "../headless"
+    },
+    {
+      "path": "../model"
     }
   ],
   "exclude": [

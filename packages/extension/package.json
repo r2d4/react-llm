@@ -1,0 +1,48 @@
+{
+  "name": "thiggle-clipper",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@react-llm/headless": "workspace:*",
+    "@types/chrome": "^0.0.236",
+    "autoprefixer": "^10.4.14",
+    "comlink": "^4.4.1",
+    "comlink-extension": "^1.0.8",
+    "postcss": "^8.4.23",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.3.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "nodemon --watch src --watch public --watch node_modules -e js,jsx,css,html,json --exec 'npm run build && npx rollup -c'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-dynamic-import-vars": "^2.0.3",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "nodemon": "^2.0.22"
+  }
+}

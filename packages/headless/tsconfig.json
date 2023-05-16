@@ -1,6 +1,7 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -26,15 +27,15 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-    },
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+  ],
+  "references": [
+    {
+      "path": "../model"
+    }
   ],
   "exclude": [
     "node_modules"

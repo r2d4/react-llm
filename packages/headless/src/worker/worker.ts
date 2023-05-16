@@ -1,7 +1,5 @@
+import { GenerateTextCallback, GenerateTextRequest, InitCallback, LLMInstance, ModelAPI, ModelInitConfig } from "@react-llm/model";
 import * as Comlink from "comlink";
-import { GenerateTextCallback, GenerateTextRequest, ModelWorker } from "../types/worker_message";
-import { InitProgressCallback } from '../worker/lib/tvm/runtime';
-import { LLMInstance } from '../worker/llm';
 
 declare global {
     var importScripts: (...url: string[]) => void;
@@ -10,7 +8,7 @@ declare global {
     };
 }
 
-const config = {
+export const defaultWorkerConfig = {
     kvConfig: {
         numLayers: 64,
         shape: [32, 32, 128],
@@ -22,33 +20,23 @@ const config = {
     sentencePieceJsUrl: 'https://cdn.matt-rickard.com/code/sentencepiece.js',
     tvmRuntimeJsUrl: 'https://cdn.matt-rickard.com/code/tvmjs_runtime.wasi.js',
     maxWindowSize: 2048,
-} as Config;
+} as ModelInitConfig;
 
-export type Config = {
-    kvConfig: {
-        numLayers: number;
-        shape: number[];
-        dtype: string;
-    };
-    wasmUrl: string;
-    cacheUrl: string;
-    tokenizerUrl: string;
-    sentencePieceJsUrl: string;
-    tvmRuntimeJsUrl: string;
-    maxWindowSize: number;
+const API = (importScripts: (...urls: string[]) => void) => {
+    return {
+        instance: null as LLMInstance | null,
+        init(callback: Comlink.ProxyOrClone<InitCallback>, config = defaultWorkerConfig) {
+            importScripts(...[
+                config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
+            ]);
+            this.instance = new LLMInstance(config, () => globalThis.sentencepiece.sentencePieceProcessor);
+            this.instance.init(callback);
+        },
+        generate(request: GenerateTextRequest, cb: Comlink.ProxyOrClone<GenerateTextCallback>) {
+            this.instance?.generate(request, cb);
+        }
+    } as ModelAPI;
 }
-const instance = new LLMInstance(config, () => globalThis.sentencepiece.sentencePieceProcessor);
-const worker = {
-    init(callback: Comlink.ProxyOrClone<InitProgressCallback>) {
-        instance.init(callback);
-    },
-    generate(request: GenerateTextRequest, cb: Comlink.ProxyOrClone<GenerateTextCallback>) {
-        instance.generate(request, cb);
-    }
-} as ModelWorker;
 
-importScripts(...[
-    config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
-]);
 
-Comlink.expose(worker);
+Comlink.expose(API(globalThis.importScripts));

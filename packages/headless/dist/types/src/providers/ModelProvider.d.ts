@@ -2,7 +2,7 @@ import React from "react";
 import { UseLLMParams, UseLLMResponse } from "../hooks/useLLM";
 export interface ModelProviderProps {
     children: React.ReactNode;
-    props?: UseLLMParams;
+    config?: UseLLMParams;
 }
 export declare const ModelProvider: React.FC<ModelProviderProps>;
-export declare const useLLM: () => UseLLMResponse;
+export declare const useLLM: (props?: UseLLMParams) => UseLLMResponse;
