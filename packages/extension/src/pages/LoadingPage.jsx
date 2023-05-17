@@ -1,8 +1,20 @@
 import { useLLM } from "@react-llm/headless";
 
 const LoadingPage = ({ progress }) => {
-  const { init } = useLLM();
+  const { init, gpuDevice } = useLLM();
 
+  if (gpuDevice?.unsupportedReason !== null && gpuDevice?.checked) {
+    return (
+      <div className="flex flex-col gap-2 p-4 text-sm">
+        <p>
+          {JSON.stringify(gpuDevice)}
+          Sorry! LLamaTab is not supported on your device. Reason $
+          {gpuDevice.unsupportedReason}. LLamaTab requires a device with WebGPU
+          support.
+        </p>
+      </div>
+    );
+  }
   if (progress === 0)
     return (
       <div className="flex flex-col gap-2 p-4 text-sm">

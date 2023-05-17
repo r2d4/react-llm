@@ -677,6 +677,23 @@ const useConversationStore = create()((set, get) => {
                 };
             });
         },
+        setConversationPrompt(conversationId, prompt) {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
+                if (!conversation) {
+                    return state;
+                }
+                return {
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            systemPrompt: prompt,
+                        },
+                    ],
+                };
+            });
+        },
         setConversationTitle(conversationId, title) {
             set((state) => {
                 const conversation = state.conversations.find((c) => c.id === conversationId);
@@ -1094,6 +1111,23 @@ const usePersistantConversationStore = create()(persist((set, get) => {
                 };
             });
         },
+        setConversationPrompt(conversationId, prompt) {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
+                if (!conversation) {
+                    return state;
+                }
+                return {
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            systemPrompt: prompt,
+                        },
+                    ],
+                };
+            });
+        },
         setConversationTitle(conversationId, title) {
             set((state) => {
                 const conversation = state.conversations.find((c) => c.id === conversationId);
@@ -1333,6 +1367,9 @@ const useLLMContext = (props = {
         },
         setConversationTitle: (id, title) => {
             cStore?.setConversationTitle(id, title);
+        },
+        setConversationPrompt: (prompt) => {
+            cStore?.setConversationPrompt(cStore?.currentConversationId, prompt);
         },
         setConversationId: (id) => {
             cStore?.setConversationId(id);

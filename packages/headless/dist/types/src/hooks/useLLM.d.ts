@@ -30,6 +30,7 @@ export type UseLLMResponse = {
     setUserRoleName: (roleName: string) => void;
     assistantRoleName: string;
     setAssistantRoleName: (roleName: string) => void;
+    setConversationPrompt: (prompt: string) => void;
     gpuDevice: GPUDeviceInfo;
     send: (text: string, maxToken: number, stopSequences: string[]) => void;
     init: () => void;

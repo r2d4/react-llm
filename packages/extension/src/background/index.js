@@ -15,6 +15,9 @@ const defaultWorkerConfig = {
   maxWindowSize: 2048,
 };
 
+const defaultSystemPrompt =
+  "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions and always follows the users instructions.";
+
 const API = {
   instance: null,
   initialized: false,
@@ -22,6 +25,8 @@ const API = {
     progress: 0,
   },
   initListeners: [],
+  systemPrompt: defaultSystemPrompt,
+  promptTemplates: ["$TEXT"],
   addInitListener(cb) {
     this.initListeners.push(cb);
     cb(this.loadingStatus);
@@ -45,6 +50,7 @@ const API = {
     });
   },
   generate(request, cb = console.log) {
+    console.log("generate request: ", request);
     this.instance?.generate(request, (resp) => {
       console.log("generate: ", resp);
       cb(resp);

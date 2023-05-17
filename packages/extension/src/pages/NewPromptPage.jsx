@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import TextArea from "./Textarea";
 const NewPromptPage = ({ setPage, promptList, setPromptList }) => {
   const [newPrompt, setNewPrompt] = useState("");
 
@@ -17,7 +18,7 @@ const NewPromptPage = ({ setPage, promptList, setPromptList }) => {
 
   return (
     <div className="flex flex-col gap-2 p-4 text-sm">
-      <div className="self-end mb-4">
+      <div className="self-end">
         <button
           className="text-blue-500 hover:underline"
           onClick={() => setPage("main")}
@@ -27,12 +28,12 @@ const NewPromptPage = ({ setPage, promptList, setPromptList }) => {
       </div>
 
       <div className="mb-4">
-        <input
-          className="w-full rounded-md border border-blue-500 p-2"
-          type="text"
+        <p className="mb-2">
+          A template for the prompt. $TEXT will be replaced by the input text.
+        </p>
+        <TextArea
           value={newPrompt}
           onChange={(e) => setNewPrompt(e.target.value)}
-          placeholder="Add new prompt"
         />
         <div className="flex justify-end">
           <button

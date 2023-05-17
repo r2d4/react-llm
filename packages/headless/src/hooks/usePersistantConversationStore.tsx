@@ -2,24 +2,7 @@ import { Conversation, Message } from "@react-llm/model";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export interface ConversationStore {
-  conversations: Conversation[];
-  currentConversationId: string;
-  setConversationId: (conversationId: string) => void;
-
-  addMessage: (conversationId: string, message: Message) => void;
-  getConversation: (conversationId: string) => Conversation | undefined;
-
-  setConversationTitle: (conversationId: string, title: string) => void;
-
-  getAllConversations: () => Conversation[];
-  deleteMessages: (conversationId: string) => void;
-
-  deleteConversation: (conversationId: string) => void;
-  createConversation: (conversation: Conversation) => void;
-  deleteAllConversations: () => void;
-}
+import { ConversationStore } from "./useConversationStore";
 
 export const defaultSystemPrompt =
   "A chat between a curious user and a AI chatbot named SmartestChild on AIM who responds with lowercase, frequent emojis, and 2000s internet abbreviations.";
@@ -44,6 +27,25 @@ const usePersistantConversationStore = create<ConversationStore>()(
             return {
               currentConversationId: conversation.id,
               conversations: [...state.conversations, conversation],
+            };
+          });
+        },
+        setConversationPrompt(conversationId, prompt) {
+          set((state) => {
+            const conversation = state.conversations.find(
+              (c) => c.id === conversationId
+            );
+            if (!conversation) {
+              return state;
+            }
+            return {
+              conversations: [
+                ...state.conversations.filter((c) => c.id !== conversationId),
+                {
+                  ...conversation,
+                  systemPrompt: prompt,
+                },
+              ],
             };
           });
         },

@@ -1,38 +1,62 @@
 "use client";
 import { useLLM } from "@react-llm/headless";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AboutPage from "./pages/AboutPage";
 import LoadingPage from "./pages/LoadingPage";
 import MainPage from "./pages/MainPage";
 import NewPromptPage from "./pages/NewPromptPage";
 import OptionsPage from "./pages/OptionsPage";
 
-export default function Page({ api }) {
-  const { init, send, setOnMessage, systemPrompt, setSystemPrompt } = useLLM();
+export default function Page({
+  loadingStatus,
+  loadedSystemPrompt,
+  loadedPromptList,
+  setPersistedPromptList,
+  setPersistedSystemPrompt,
+}) {
+  const {
+    send,
+    setOnMessage,
+    isGenerating,
+    setConversationPrompt,
+    conversation,
+  } = useLLM();
   const [text, setText] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [promptList, setPromptList] = useState([]);
   const [response, setResponse] = useState("");
   const [page, setPage] = useState("main");
   const [maxTokens, setMaxTokens] = useState(100);
-  const [loadingStatus, setLoadingStatus] = useState({});
+  const [systemPrompt, setSystemPrompt] = useState(loadedSystemPrompt);
+  const [promptList, setPromptList] = useState(loadedPromptList);
+  const [prompt, setPrompt] = useState(loadedPromptList && loadedPromptList[0]);
 
   useEffect(() => {
-    api.addInitListener(setLoadingStatus);
-    setOnMessage((data) => {
+    return () => {
+      setPersistedPromptList(promptList);
+      setPersistedSystemPrompt(systemPrompt);
+    };
+  });
+
+  useEffect(() => {
+    setOnMessage(() => (data) => {
+      console.log(data);
       setResponse(data);
     });
-    return () => {
-      api.removeInitListener(setLoadingStatus);
-    };
-  }, [api, init, setOnMessage]);
+  }, [setOnMessage]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    send(text, maxTokens);
-  };
+  useEffect(() => {
+    if (conversation?.systemPrompt !== systemPrompt) {
+      setConversationPrompt(systemPrompt);
+    }
+  }, [systemPrompt, conversation]);
 
-  console.log("progress", loadingStatus);
+  const handleSubmit = useCallback(
+    (e) => {
+      e?.preventDefault();
+      const tmpl = prompt ? prompt.replace(/\$TEXT/g, text) : text;
+      send(tmpl, maxTokens);
+    },
+    [send, prompt, text, maxTokens]
+  );
 
   if (loadingStatus.progress < 1) {
     return <LoadingPage progress={loadingStatus.progress} />;
@@ -51,8 +75,6 @@ export default function Page({ api }) {
           setSystemPrompt={setSystemPrompt}
         />
       );
-    case "load":
-      return <LoadingPage />;
     case "newPrompt":
       return (
         <NewPromptPage
@@ -72,6 +94,7 @@ export default function Page({ api }) {
           response={response}
           text={text}
           setText={setText}
+          isGenerating={isGenerating}
         />
       );
   }

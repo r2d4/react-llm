@@ -11,6 +11,7 @@ export interface ConversationStore {
   getConversation: (conversationId: string) => Conversation | undefined;
 
   setConversationTitle: (conversationId: string, title: string) => void;
+  setConversationPrompt: (conversationId: string, prompt: string) => void;
 
   getAllConversations: () => Conversation[];
   deleteMessages: (conversationId: string) => void;
@@ -41,6 +42,25 @@ const useConversationStore = create<ConversationStore>()((set, get) => {
         return {
           currentConversationId: conversation.id,
           conversations: [...state.conversations, conversation],
+        };
+      });
+    },
+    setConversationPrompt(conversationId, prompt) {
+      set((state) => {
+        const conversation = state.conversations.find(
+          (c) => c.id === conversationId
+        );
+        if (!conversation) {
+          return state;
+        }
+        return {
+          conversations: [
+            ...state.conversations.filter((c) => c.id !== conversationId),
+            {
+              ...conversation,
+              systemPrompt: prompt,
+            },
+          ],
         };
       });
     },

@@ -90,6 +90,9 @@ export type UseLLMResponse = {
   // SetAssistantRoleName sets the assistant role name.
   setAssistantRoleName: (roleName: string) => void;
 
+  // SetConversationPrompt modifies the prompt of the current conversation.
+  setConversationPrompt: (prompt: string) => void;
+
   // GpuDevice returns the current GPU device info. If GPU is not supported, this will return an object with unsupportedReason set.
   gpuDevice: GPUDeviceInfo;
 
@@ -241,6 +244,10 @@ export const useLLMContext = (
 
     setConversationTitle: (id: string, title: string) => {
       cStore?.setConversationTitle(id, title);
+    },
+
+    setConversationPrompt: (prompt: string) => {
+      cStore?.setConversationPrompt(cStore?.currentConversationId, prompt);
     },
 
     setConversationId: (id: string) => {

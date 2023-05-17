@@ -1,3 +1,5 @@
+import React, { useEffect } from "react";
+import TextArea from "./Textarea";
 const MainPage = ({
   prompt,
   setPrompt,
@@ -7,7 +9,24 @@ const MainPage = ({
   response,
   text,
   setText,
+  isGenerating,
 }) => {
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      console.log(event);
+      if (event.metaKey && event.key === "Enter") {
+        event.preventDefault();
+        handleSubmit();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleSubmit]);
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="flex flex-col m-auto p-3 text-sm gap-2 relative">
@@ -19,37 +38,33 @@ const MainPage = ({
         </div>
         <div>
           <div>Text</div>
-          <textarea
-            className="w-full rounded-md border border-blue-500 p-2 resize-none"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
+          <TextArea value={text} onChange={(e) => setText(e.target.value)} />
         </div>
         <div>
           <div>Prompt Template</div>
           <select
-            className="w-full rounded-md border border-blue-500 p-1"
-            value={prompt}
+            className="w-full rounded-md border border-gray-300 p-1"
+            defaultValue={prompt}
             onChange={(e) => setPrompt(e.target.value)}
           >
-            {promptList.map((prompt, idx) => (
-              <option key={idx} value={prompt}>
-                {prompt}
+            {promptList.map((item, idx) => (
+              <option key={idx} value={item}>
+                {item}
               </option>
             ))}
           </select>
         </div>
-        <div className="flex w-full items-center">
-          <div className="flex-grow flex gap-2 flex-col">
+        <div className="flex  w-full items-center">
+          <div className="flex-grow flex gap-2 justify-center m-2">
             <div>
               <button
-                className="text-blue-500 "
+                className="text-blue-500"
                 onClick={() => setPage("newPrompt")}
               >
-                Add New Prompt
+                Manage templates
               </button>
             </div>
-            <div className="flex">
+            <div className="">
               <button
                 className="self-end text-blue-500"
                 onClick={() => setPage("options")}
@@ -57,22 +72,30 @@ const MainPage = ({
                 Advanced Options
               </button>
             </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              className="self-end rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-            >
-              Generate
-            </button>
+            <div className="self-end flex flex-col justify-center">
+              <button
+                type="submit"
+                className="self-end rounded bg-blue-500 px-2 py-2 font-bold text-white hover:bg-blue-700"
+              >
+                Generate
+              </button>
+              <div className="text-xs text-gray-400 m-1">(⌘+Enter)</div>
+            </div>
           </div>
         </div>
 
+        {isGenerating && (
+          <div className="flex flex-col gap-2 items-center py-3">
+            <div className="self-start">
+              <p className="text-bold">Thinking... </p>
+            </div>
+          </div>
+        )}
+
         {response && (
           <div>
-            <div>Response</div>
-            <div className="border h-[50px] rounded-md"></div>
+            <div>Assistant</div>
+            <div className="border rounded-md p-3">{response.outputText}</div>
           </div>
         )}
       </div>
