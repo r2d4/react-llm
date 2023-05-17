@@ -15,6 +15,9 @@ export type GenerateTextRequest = {
     stopTexts: string[],
     maxTokens: number,
     assistantRoleName: string,
+    temperature: number,
+    top_p: number,
+
 }
 
 export type GenerateTextResponse = {
