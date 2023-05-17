@@ -4,6 +4,7 @@ import { Remote } from "comlink";
 export type UseLLMParams = {
     autoInit?: boolean;
     api?: Remote<ModelAPI>;
+    persistToLocalStorage: boolean;
 };
 export type GPUDeviceInfo = {
     adapter: GPUAdapter | null;

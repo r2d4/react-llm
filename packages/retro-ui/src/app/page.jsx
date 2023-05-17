@@ -4,7 +4,11 @@ import { ModelProvider } from "@react-llm/headless";
 
 export default function Home() {
   return (
-    <ModelProvider>
+    <ModelProvider
+      config={{
+        persistToLocalStorage: true,
+      }}
+    >
       <Chat />
     </ModelProvider>
   );

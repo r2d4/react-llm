@@ -24,7 +24,7 @@ export class LLMInstance {
     return this.model != undefined;
   }
 
-  async init(cb: InitProgressCallback) {
+  async init(cb: InitProgressCallback = console.log) {
     if (this.model) {
       return;
     }
@@ -59,7 +59,7 @@ export class LLMInstance {
     return this.model.init();
   }
 
-  async generate(request: GenerateTextRequest, cb: GenerateTextCallback) {
+  async generate(request: GenerateTextRequest, cb: GenerateTextCallback = console.log) {
     if (this.processing) {
       return;
     }

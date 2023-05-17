@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@react-llm/headless": "workspace:*",
+    "@react-llm/model": "workspace:^",
     "@types/chrome": "^0.0.236",
     "autoprefixer": "^10.4.14",
     "comlink": "^4.4.1",
@@ -16,10 +17,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && npx rollup -c",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "nodemon --watch src --watch public --watch node_modules -e js,jsx,css,html,json --exec 'npm run build && npx rollup -c'"
+    "dev": "nodemon --watch src --watch public --watch node_modules -e js,jsx,css,html,json,ts,tsx --exec 'pnpm run build'"
   },
   "eslintConfig": {
     "extends": [

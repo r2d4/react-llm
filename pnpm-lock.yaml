@@ -13,6 +13,9 @@ importers:
       '@react-llm/headless':
         specifier: workspace:*
         version: link:../headless
+      '@react-llm/model':
+        specifier: workspace:^
+        version: link:../model
       '@types/chrome':
         specifier: ^0.0.236
         version: 0.0.236

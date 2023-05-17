@@ -10,7 +10,8 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "dev": "rollup -c -w"
   },
   "devDependencies": {
     "esbuild": "^0.17.19",

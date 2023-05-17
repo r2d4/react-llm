@@ -4,7 +4,11 @@
   "version": "1.0",
   "description": "This is my awesome Chrome extension.",
   "background": {
-    "scripts": ["background.bundle.js"],
+    "scripts": [
+      "models/sentencepiece.js",
+      "models/tvmjs_runtime.wasi.js",
+      "background.bundle.js"
+    ],
     "persistent": true
   },
   "permissions": ["tabs", "storage"],

@@ -86,8 +86,8 @@ declare class LLMInstance {
     processing: boolean;
     constructor(config: ModelInitConfig, sentencePieceProcessor: any);
     isInitialized(): boolean;
-    init(cb: InitProgressCallback): Promise<any>;
-    generate(request: GenerateTextRequest, cb: GenerateTextCallback): Promise<void>;
+    init(cb?: InitProgressCallback): Promise<any>;
+    generate(request: GenerateTextRequest, cb?: GenerateTextCallback): Promise<void>;
 }
 
 export { Conversation, GenerateTextCallback, GenerateTextRequest, GenerateTextResponse, InitCallback, InitResponse, LLMInstance, Message, ModelAPI, ModelInitConfig, LLMInstance as default, detectGPUDevice };

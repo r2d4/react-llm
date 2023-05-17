@@ -5,4 +5,4 @@ export interface ModelProviderProps {
     config?: UseLLMParams;
 }
 export declare const ModelProvider: React.FC<ModelProviderProps>;
-export declare const useLLM: (props?: UseLLMParams) => UseLLMResponse;
+export declare const useLLM: () => UseLLMResponse;

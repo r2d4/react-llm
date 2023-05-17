@@ -5,6 +5,7 @@ import { Remote } from 'comlink';
 type UseLLMParams = {
     autoInit?: boolean;
     api?: Remote<ModelAPI>;
+    persistToLocalStorage: boolean;
 };
 type GPUDeviceInfo = {
     adapter: GPUAdapter | null;
@@ -40,6 +41,6 @@ interface ModelProviderProps {
     config?: UseLLMParams;
 }
 declare const ModelProvider: React.FC<ModelProviderProps>;
-declare const useLLM: (props?: UseLLMParams) => UseLLMResponse;
+declare const useLLM: () => UseLLMResponse;
 
 export { ModelProvider, ModelProviderProps, useLLM };

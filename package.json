@@ -15,7 +15,8 @@
   ],
   "scripts": {
     "publish": "pnpm publish --filter ./packages/* ",
-    "build": "pnpm recursive run clean && pnpm recursive run build"
+    "build": "pnpm recursive run clean && pnpm recursive run build",
+    "dev": "pnpm recursive  run --no-bail --workspace-concurrency Infinity dev"
   },
   "devDependencies": {
     "typescript": "^5.0.4"

@@ -1,14 +1,6 @@
-import { GenerateTextCallback, GenerateTextRequest, InitCallback, LLMInstance, ModelAPI, ModelInitConfig } from "@react-llm/model";
-import * as Comlink from "comlink";
+import { e as expose, L as LLMInstance } from './comlink-9118e156.js';
 
-declare global {
-    var importScripts: (...url: string[]) => void;
-    var sentencepiece: {
-        sentencePieceProcessor: (url: string) => void;
-    };
-}
-
-export const defaultWorkerConfig = {
+const defaultWorkerConfig = {
     kvConfig: {
         numLayers: 64,
         shape: [32, 32, 128],
@@ -20,12 +12,11 @@ export const defaultWorkerConfig = {
     sentencePieceJsUrl: 'https://cdn.matt-rickard.com/code/sentencepiece.js',
     tvmRuntimeJsUrl: 'https://cdn.matt-rickard.com/code/tvmjs_runtime.wasi.js',
     maxWindowSize: 2048,
-} as ModelInitConfig;
-
-const API = (importScripts: (...urls: string[]) => void) => {
+};
+const API = (importScripts) => {
     return {
-        instance: null as LLMInstance | null,
-        init(callback: Comlink.ProxyOrClone<InitCallback>, config = defaultWorkerConfig) {
+        instance: null,
+        init(callback, config = defaultWorkerConfig) {
             callback({
                 type: 'init',
                 progress: 0.01,
@@ -34,18 +25,21 @@ const API = (importScripts: (...urls: string[]) => void) => {
                 totalChunks: 0,
                 fetchedBytes: 0,
                 totalBytes: 0
-            })
+            });
             importScripts(...[
                 config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
             ]);
             this.instance = new LLMInstance(config, () => globalThis.sentencepiece.sentencePieceProcessor);
-            this.instance.init(callback);
+            this.instance.init((resp) => {
+                console.log(resp);
+                callback(resp);
+            });
         },
-        generate(request: GenerateTextRequest, cb: Comlink.ProxyOrClone<GenerateTextCallback>) {
+        generate(request, cb) {
             this.instance?.generate(request, cb);
         }
-    } as ModelAPI;
-}
+    };
+};
+expose(API(globalThis.importScripts));
 
-
-Comlink.expose(API(globalThis.importScripts));
+export { defaultWorkerConfig };

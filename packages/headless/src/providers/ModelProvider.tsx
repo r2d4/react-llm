@@ -10,7 +10,7 @@ const ModelContext = createContext<UseLLMResponse | null>(null);
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({
   children,
-  config = {} as UseLLMParams,
+  config,
 }) => {
   const LLMValue = useLLMContext(config);
   return (
@@ -18,7 +18,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({
   );
 };
 
-export const useLLM = (props = {} as UseLLMParams): UseLLMResponse => {
+export const useLLM = (): UseLLMResponse => {
   const context = useContext(ModelContext);
   if (context === null) {
     throw new Error("useLLMContext must be used within a LLMProvider");

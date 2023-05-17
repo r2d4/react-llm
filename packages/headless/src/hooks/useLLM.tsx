@@ -4,6 +4,7 @@ import {
   GenerateTextResponse,
   InitResponse,
   ModelAPI,
+  ModelInitConfig,
   detectGPUDevice,
 } from "@react-llm/model";
 import * as Comlink from "comlink";
@@ -13,11 +14,13 @@ import { v4 as uuidv4 } from "uuid";
 import useConversationStore, {
   defaultSystemPrompt,
 } from "./useConversationStore";
+import usePersistantConversationStore from "./usePersistantConversationStore";
 import useStore from "./useStore";
 
 export type UseLLMParams = {
   autoInit?: boolean;
   api?: Remote<ModelAPI>;
+  persistToLocalStorage: boolean;
 };
 
 const initialProgress = {
@@ -97,12 +100,18 @@ export type UseLLMResponse = {
   init: () => void;
 };
 
-export const useLLMContext = (props = {} as UseLLMParams): UseLLMResponse => {
+export const useLLMContext = (
+  props = {
+    persistToLocalStorage: true,
+  } as UseLLMParams
+): UseLLMResponse => {
   const [loadingStatus, setLoadingStatus] =
     useState<InitResponse>(initialProgress);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const workerRef = useRef<Remote<ModelAPI>>();
-  const cStore = useStore(useConversationStore, (state) => state);
+  const cStore = props.persistToLocalStorage
+    ? useStore(usePersistantConversationStore, (state) => state)
+    : useStore(useConversationStore, (state) => state);
   const [userRoleName, setUserRoleName] = useState<string>("user");
   const [assistantRoleName, setAssistantRoleName] =
     useState<string>("assistant");
@@ -178,35 +187,38 @@ export const useLLMContext = (props = {} as UseLLMParams): UseLLMResponse => {
     }
   }, [props.api]);
 
-  const send = (
-    text: string,
-    maxTokens = 100,
-    stopStrings = [userRoleName, assistantRoleName] as string[]
-  ) => {
-    const currentConversation = cStore?.getConversation(
-      cStore?.currentConversationId
-    );
-    if (!currentConversation) {
-      throw new Error("Invalid conversation id");
-    }
-    currentConversation?.messages.push({
-      id: uuidv4(),
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      role: userRoleName,
-      text,
-    });
-    setIsGenerating(true);
-    workerRef?.current?.generate(
-      {
-        conversation: currentConversation,
-        stopTexts: stopStrings,
-        maxTokens,
-        assistantRoleName,
-      } as GenerateTextRequest,
-      Comlink.proxy(addMessage)
-    );
-  };
+  const send = useCallback(
+    (
+      text: string,
+      maxTokens = 100,
+      stopStrings = [userRoleName, assistantRoleName] as string[]
+    ) => {
+      const currentConversation = cStore?.getConversation(
+        cStore?.currentConversationId
+      );
+      if (!currentConversation) {
+        throw new Error("Invalid conversation id");
+      }
+      currentConversation?.messages.push({
+        id: uuidv4(),
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        role: userRoleName,
+        text,
+      });
+      setIsGenerating(true);
+      workerRef?.current?.generate(
+        {
+          conversation: currentConversation,
+          stopTexts: stopStrings,
+          maxTokens,
+          assistantRoleName,
+        } as GenerateTextRequest,
+        Comlink.proxy(addMessage)
+      );
+    },
+    [workerRef?.current]
+  );
 
   return {
     conversation: cStore?.getConversation(cStore?.currentConversationId),
@@ -255,8 +267,8 @@ export const useLLMContext = (props = {} as UseLLMParams): UseLLMResponse => {
     gpuDevice,
 
     send,
-    init: () => workerRef?.current?.init(Comlink.proxy(setLoadingStatus)),
-
+    init: (config?: ModelInitConfig) =>
+      workerRef?.current?.init(Comlink.proxy(setLoadingStatus), config),
     deleteAllConversations: () => cStore?.deleteAllConversations(),
   };
 };

@@ -1,17 +1,25 @@
 import { ModelProvider } from "@react-llm/headless";
-import Model from "./Model";
-import api from "./lib/api";
+import { useEffect, useState } from "react";
+import Page from "./Page";
 
 function App() {
+  const [api, setApi] = useState(null);
+  useEffect(() => {
+    // eslint-disable-next-line no-undef
+    chrome.runtime.getBackgroundPage((backgroundPage) => {
+      setApi(backgroundPage.API);
+    });
+  }, []);
+  if (!api) return null;
   return (
-    <div>
+    <div className="w-[300px]">
       <ModelProvider
         config={{
           api,
         }}
       >
         <div>
-          <Model />
+          <Page api={api} />
         </div>
       </ModelProvider>
     </div>

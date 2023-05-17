@@ -2985,7 +2985,7 @@ class LLMInstance {
   isInitialized() {
     return this.model != void 0;
   }
-  async init(cb) {
+  async init(cb = console.log) {
     if (this.model) {
       return;
     }
@@ -3018,7 +3018,7 @@ class LLMInstance {
     });
     return this.model.init();
   }
-  async generate(request, cb) {
+  async generate(request, cb = console.log) {
     if (this.processing) {
       return;
     }

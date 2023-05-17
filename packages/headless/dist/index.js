@@ -1,5 +1,5 @@
 import require$$0, { useDebugValue, useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
-import { d as detectGPUDevice, w as wrap, p as proxy } from './comlink-34a1f4b2.js';
+import { d as detectGPUDevice, w as wrap, p as proxy } from './comlink-9118e156.js';
 
 // Unique ID creation requires a high quality random # generator. In the browser we therefore
 // require the crypto API and do not support built-in fallback to lower quality random number
@@ -656,6 +656,133 @@ const createImpl = createState => {
 };
 const create = createState => createState ? createImpl(createState) : createImpl;
 
+const defaultSystemPrompt$1 = "A chat between a curious user and a AI chatbot named SmartestChild on AIM who responds with lowercase, frequent emojis, and 2000s internet abbreviations.";
+const useConversationStore = create()((set, get) => {
+    const initialConversation = {
+        id: v4(),
+        title: "Untitled",
+        updatedAt: new Date().getTime(),
+        systemPrompt: defaultSystemPrompt$1,
+        createdAt: new Date().getTime(),
+        messages: [],
+    };
+    return {
+        conversations: [initialConversation],
+        currentConversationId: initialConversation.id,
+        createConversation: (conversation) => {
+            set((state) => {
+                return {
+                    currentConversationId: conversation.id,
+                    conversations: [...state.conversations, conversation],
+                };
+            });
+        },
+        setConversationTitle(conversationId, title) {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
+                if (!conversation) {
+                    return state;
+                }
+                return {
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            title,
+                        },
+                    ],
+                };
+            });
+        },
+        deleteConversation(conversationId) {
+            set((state) => {
+                return {
+                    conversations: state.conversations.filter((c) => c.id !== conversationId),
+                };
+            });
+        },
+        setConversationId: (conversationId) => {
+            const conversationExists = get().conversations.some((c) => c.id === conversationId);
+            if (!conversationExists) {
+                throw new Error("Invalid conversation id");
+            }
+            set((state) => {
+                return {
+                    ...state,
+                    currentConversationId: conversationId,
+                };
+            });
+        },
+        deleteAllConversations: () => {
+            set((state) => {
+                return {
+                    conversations: [],
+                };
+            });
+        },
+        deleteMessages: (conversationId) => {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
+                if (!conversation) {
+                    return state;
+                }
+                return {
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            updatedAt: new Date().getTime(),
+                            messages: [],
+                        },
+                    ],
+                };
+            });
+        },
+        getConversation(conversationId) {
+            return get().conversations.find((c) => c.id === conversationId);
+        },
+        getAllConversations() {
+            return get().conversations;
+        },
+        addMessage: (conversationId, message) => {
+            set((state) => {
+                const conversation = state.conversations.find((c) => c.id === conversationId);
+                if (!conversation) {
+                    return state;
+                }
+                const existingMessage = conversation.messages.find((m) => m.id === message.id);
+                if (existingMessage) {
+                    // Update message
+                    return {
+                        conversations: [
+                            ...state.conversations.filter((c) => c.id !== conversationId),
+                            {
+                                ...conversation,
+                                updatedAt: new Date().getTime(),
+                                messages: [
+                                    ...conversation.messages.filter((m) => m.id !== message.id),
+                                    message,
+                                ],
+                            },
+                        ],
+                    };
+                }
+                // Add message
+                return {
+                    conversations: [
+                        ...state.conversations.filter((c) => c.id !== conversationId),
+                        {
+                            ...conversation,
+                            updatedAt: new Date().getTime(),
+                            messages: [...conversation.messages, message],
+                        },
+                    ],
+                };
+            });
+        },
+    };
+});
+
 function createJSONStorage(getStorage, options) {
   let storage;
   try {
@@ -947,7 +1074,7 @@ const persistImpl = (config, baseOptions) => {
 const persist = persistImpl;
 
 const defaultSystemPrompt = "A chat between a curious user and a AI chatbot named SmartestChild on AIM who responds with lowercase, frequent emojis, and 2000s internet abbreviations.";
-const useConversationStore = create()(persist((set, get) => {
+const usePersistantConversationStore = create()(persist((set, get) => {
     const initialConversation = {
         id: v4(),
         title: "Untitled",
@@ -1095,11 +1222,15 @@ const initialProgress = {
     fetchedBytes: 0,
     totalBytes: 0,
 };
-const useLLMContext = (props = {}) => {
+const useLLMContext = (props = {
+    persistToLocalStorage: true,
+}) => {
     const [loadingStatus, setLoadingStatus] = useState(initialProgress);
     const [isGenerating, setIsGenerating] = useState(false);
     const workerRef = useRef();
-    const cStore = useStore(useConversationStore, (state) => state);
+    const cStore = props.persistToLocalStorage
+        ? useStore(usePersistantConversationStore, (state) => state)
+        : useStore(useConversationStore, (state) => state);
     const [userRoleName, setUserRoleName] = useState("user");
     const [assistantRoleName, setAssistantRoleName] = useState("assistant");
     const [gpuDevice, setGpuDevice] = useState({
@@ -1162,11 +1293,11 @@ const useLLMContext = (props = {}) => {
                 workerRef.current = props.api;
             }
             else {
-                workerRef.current = wrap(new Worker(new URL("worker-d7232018.js", import.meta.url)));
+                workerRef.current = wrap(new Worker(new URL("worker-9079896e.js", import.meta.url)));
             }
         }
     }, [props.api]);
-    const send = (text, maxTokens = 100, stopStrings = [userRoleName, assistantRoleName]) => {
+    const send = useCallback((text, maxTokens = 100, stopStrings = [userRoleName, assistantRoleName]) => {
         const currentConversation = cStore?.getConversation(cStore?.currentConversationId);
         if (!currentConversation) {
             throw new Error("Invalid conversation id");
@@ -1185,7 +1316,7 @@ const useLLMContext = (props = {}) => {
             maxTokens,
             assistantRoleName,
         }, proxy(addMessage));
-    };
+    }, [workerRef?.current]);
     return {
         conversation: cStore?.getConversation(cStore?.currentConversationId),
         allConversations: cStore?.conversations.sort((a, b) => b.updatedAt - a.updatedAt),
@@ -1194,7 +1325,7 @@ const useLLMContext = (props = {}) => {
             cStore?.createConversation({
                 id,
                 title: title ?? "Untitled",
-                systemPrompt: prompt ?? defaultSystemPrompt,
+                systemPrompt: prompt ?? defaultSystemPrompt$1,
                 messages: [],
                 createdAt: new Date().getTime(),
                 updatedAt: new Date().getTime(),
@@ -1220,17 +1351,17 @@ const useLLMContext = (props = {}) => {
         setAssistantRoleName,
         gpuDevice,
         send,
-        init: () => workerRef?.current?.init(proxy(setLoadingStatus)),
+        init: (config) => workerRef?.current?.init(proxy(setLoadingStatus), config),
         deleteAllConversations: () => cStore?.deleteAllConversations(),
     };
 };
 
 const ModelContext = createContext(null);
-const ModelProvider = ({ children, config = {}, }) => {
+const ModelProvider = ({ children, config, }) => {
     const LLMValue = useLLMContext(config);
     return (require$$0.createElement(ModelContext.Provider, { value: LLMValue }, children));
 };
-const useLLM = (props = {}) => {
+const useLLM = () => {
     const context = useContext(ModelContext);
     if (context === null) {
         throw new Error("useLLMContext must be used within a LLMProvider");
