@@ -2945,7 +2945,9 @@ class LLMInstanceScope {
       conversation,
       maxTokens,
       assistantRoleName,
-      stopTexts
+      stopTexts,
+      temperature,
+      top_p
     } = request;
     const tokens = await this.getTokens(conversation, maxTokens);
     tokens.push(...(await this.tokenizer.encodeIds(`${assistantRoleName}:`)));
@@ -2969,7 +2971,7 @@ class LLMInstanceScope {
       }
       const logits = this.tvm.detachFromCurrentScope(this.forward(input, this.kvCacheLength + inputTokenLength + step));
       this.tvm.endScope();
-      const nextToken = await this.sampleTokenFromLogits(logits);
+      const nextToken = await this.sampleTokenFromLogits(logits, temperature, top_p);
       logits.dispose();
       tokens.push(nextToken);
       const outputTokens = tokens.slice(inputTokenLength);

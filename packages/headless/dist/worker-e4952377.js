@@ -1,4 +1,4 @@
-import { e as expose, L as LLMInstance } from './comlink-9118e156.js';
+import { e as expose, L as LLMInstance } from './comlink-225113f4.js';
 
 const defaultWorkerConfig = {
     kvConfig: {
@@ -17,7 +17,15 @@ const API = (importScripts) => {
     return {
         instance: null,
         init(callback, config = defaultWorkerConfig) {
-            console.log('init', callback);
+            callback({
+                type: 'init',
+                progress: 0.01,
+                timeElapsed: 0,
+                currentChunk: 0,
+                totalChunks: 0,
+                fetchedBytes: 0,
+                totalBytes: 0
+            });
             importScripts(...[
                 config.sentencePieceJsUrl, config.tvmRuntimeJsUrl
             ]);

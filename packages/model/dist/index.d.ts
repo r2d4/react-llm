@@ -64,6 +64,8 @@ type GenerateTextRequest = {
     stopTexts: string[];
     maxTokens: number;
     assistantRoleName: string;
+    temperature: number;
+    top_p: number;
 };
 type GenerateTextResponse = {
     requestId: string;

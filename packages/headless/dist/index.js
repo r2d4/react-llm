@@ -1,5 +1,5 @@
 import require$$0, { useDebugValue, useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
-import { d as detectGPUDevice, w as wrap, p as proxy } from './comlink-9118e156.js';
+import { d as detectGPUDevice, w as wrap, p as proxy } from './comlink-225113f4.js';
 
 // Unique ID creation requires a high quality random # generator. In the browser we therefore
 // require the crypto API and do not support built-in fallback to lower quality random number
@@ -1327,7 +1327,7 @@ const useLLMContext = (props = {
                 workerRef.current = props.api;
             }
             else {
-                workerRef.current = wrap(new Worker(new URL("worker-9079896e.js", import.meta.url)));
+                workerRef.current = wrap(new Worker(new URL("worker-e4952377.js", import.meta.url)));
             }
         }
     }, [props.api]);

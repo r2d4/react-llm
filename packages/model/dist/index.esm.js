@@ -3117,7 +3117,7 @@ class LLMInstanceScope {
     return tokens;
   }
   async generate(request, cb) {
-    const { conversation, maxTokens, assistantRoleName, stopTexts } = request;
+    const { conversation, maxTokens, assistantRoleName, stopTexts, temperature, top_p } = request;
     const tokens = await this.getTokens(conversation, maxTokens);
     tokens.push(...await this.tokenizer.encodeIds(`${assistantRoleName}:`));
     console.log("debug: ", await this.tokenizer.decodeIds(tokens));
@@ -3140,7 +3140,7 @@ class LLMInstanceScope {
         this.forward(input, this.kvCacheLength + inputTokenLength + step)
       );
       this.tvm.endScope();
-      const nextToken = await this.sampleTokenFromLogits(logits);
+      const nextToken = await this.sampleTokenFromLogits(logits, temperature, top_p);
       logits.dispose();
       tokens.push(nextToken);
       const outputTokens = tokens.slice(inputTokenLength);
