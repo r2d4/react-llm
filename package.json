@@ -14,7 +14,7 @@
     "packages/extension"
   ],
   "scripts": {
-    "publish": "pnpm publish --filter ./packages/* ",
+    "publish": "pnpm -r --access public",
     "build": "pnpm recursive run clean && pnpm recursive run build",
     "dev": "pnpm recursive  run --no-bail --workspace-concurrency Infinity dev"
   },

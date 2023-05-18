@@ -1,13 +1,12 @@
 {
   "name": "@react-llm/model",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "author": "Matt Rickard <npm@matt-rickard.com>",
   "license": "MIT",
-  "private": true,
   "scripts": {
     "build": "rollup -c",
     "clean": "rm -rf dist",
