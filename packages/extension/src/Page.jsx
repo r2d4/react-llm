@@ -24,7 +24,7 @@ export default function Page({
   const [text, setText] = useState("");
   const [response, setResponse] = useState("");
   const [page, setPage] = useState("main");
-  const [maxTokens, setMaxTokens] = useState(100);
+  const [maxTokens, setMaxTokens] = useState(400);
   const [systemPrompt, setSystemPrompt] = useState(loadedSystemPrompt);
   const [promptList, setPromptList] = useState(loadedPromptList);
   const [prompt, setPrompt] = useState(loadedPromptList && loadedPromptList[0]);

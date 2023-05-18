@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import TextArea from "./Textarea";
 const MainPage = ({
   prompt,
@@ -11,6 +11,18 @@ const MainPage = ({
   setText,
   isGenerating,
 }) => {
+  const scrollRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView();
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [response, isGenerating]);
+
   useEffect(() => {
     const handleKeyPress = (event) => {
       console.log(event);
@@ -98,6 +110,7 @@ const MainPage = ({
             <div className="border rounded-md p-3">{response.outputText}</div>
           </div>
         )}
+        <div ref={scrollRef}></div>
       </div>
     </form>
   );
