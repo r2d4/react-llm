@@ -22,6 +22,12 @@ Easy-to-use headless React Hooks to run LLMs in the browser with WebGPU. As simp
 npm install @react-llm/headless
 ```
 
+## Packages in this repository
+- [@react-llm/model](packages/model) - The LLM model and tokenizer compiled for the browser
+- [@react-llm/retro-ui](packages/retro-ui) - Retro-themed UI for the hooks
+- [@react-llm/extension](packages/extension) - Chrome Extension that uses the hooks
+- [@react-llm/headless](packages/headless) - Headless React Hooks for running LLMs in the browser
+
 
 ## **useLLM** API
 ### Types

@@ -60,7 +60,11 @@ const MainPage = ({
             onChange={(e) => setPrompt(e.target.value)}
           >
             {promptList.map((item, idx) => (
-              <option key={idx} value={item}>
+              <option
+                className="whitespace-nowrap overflow-hidden text-ellipsis w-[50x]"
+                key={idx}
+                value={item}
+              >
                 {item}
               </option>
             ))}

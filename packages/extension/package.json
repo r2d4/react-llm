@@ -1,5 +1,5 @@
 {
-  "name": "thiggle-clipper",
+  "name": "@react-llm/llamatab",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
@@ -20,7 +20,8 @@
     "build": "react-scripts build && npx rollup -c",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "nodemon --watch src --watch public --watch node_modules -e js,jsx,css,html,json,ts,tsx --exec 'pnpm run build'"
+    "dev": "nodemon --watch src --watch public --watch node_modules -e js,jsx,css,html,json,ts,tsx --exec 'pnpm run build'",
+    "build:extension": "mkdir -p dist/ && pnpm run build && zip -r dist/llamatab-extension.zip build"
   },
   "eslintConfig": {
     "extends": [
