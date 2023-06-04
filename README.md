@@ -8,7 +8,7 @@ Easy-to-use headless React Hooks to run LLMs in the browser with WebGPU. As simp
 
 **Features**:
 
-* Supports [Vicuna 13B](https://lmsys.org/blog/2023-03-30-vicuna/)
+* Supports [Vicuna 7B](https://lmsys.org/blog/2023-03-30-vicuna/)
 * Use custom system prompts and "user:"/"assistant:" role names
 * Completion options like `max tokens` and `stop sequences`
 * No data leaves the browser. Accelerated via WebGPU.
@@ -106,7 +106,7 @@ const MyComponent = () => {
 This library is a set of React Hooks that provide a simple interface to run LLMs in the browser. It uses Vicuna 13B.
 
 * SentencePiece tokenizer (compiled for the browser via Emscripten)
-* Vicuna 13B (transformed to Apache TVM format)
+* Vicuna 7B (transformed to Apache TVM format)
 * Apache TVM and MLC Relax (compiled for the browser via Emscripten)
 * Off-the-main-thread WebWorker to run the model (bundled with the library)
 
