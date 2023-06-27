@@ -95,6 +95,33 @@ const MyComponent = () => {
 };
 ```
 
+### Provider
+```typescript
+import { ModelProvider } from "@react-llm/headless";
+
+export default function Home() {
+  return (
+    <ModelProvider
+      config={{
+        kvConfig: {
+          numLayers: 64,
+          shape: [32, 32, 128],
+          dtype: 'float32',
+        },
+        wasmUrl: 'https://your-custom-url.com/model.wasm',
+        cacheUrl: 'https://your-custom-url.com/cache/',
+        tokenizerUrl: 'https://your-custom-url.com/tokenizer.model',
+        sentencePieceJsUrl: 'https://your-custom-url.com/sentencepiece.js',
+        tvmRuntimeJsUrl: 'https://your-custom-url.com/tvmjs_runtime.wasi.js',
+        maxWindowSize: 2048,
+        persistToLocalStorage: true,
+      }}
+    >
+      <Chat />
+    </ModelProvider>
+  );
+}
+```
 
 ### Packages
 
